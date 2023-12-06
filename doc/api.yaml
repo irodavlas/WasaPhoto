@@ -1,273 +1,705 @@
-openapi: 3.0.0
-servers:
-  - url: "http://localhost:3000"
+openapi: '3.0.2'
 info:
-  title: Fantastic Coffee (decaffeinated)
-  description: Fantastic Coffee (decaffeinated), the skeleton project for Web and Software architecture course
-  version: 1.0.0
+  title: WASAPhoto project
+  version: '0.0.1'
+  description: This API allows users to upload and manage their images and informations
 paths:
-  /status:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-    get:
-      tags: ["General"]
-      operationId: getStatusMessage
-      summary: Get status message for the user about issues / updates
-      description: |-
-        The response contains a status message meant for the user. It might
-        contains information about current technical issues, update messages
-        or general information.
-      responses:
-        "200":
-          description: Status message available
+    /session: #doLogin
+      post:
+        tags: ["login"]
+        summary: Logs in the user
+        description: |-
+          If the user does not exist, it will be created,
+          and an identifier is returned.
+          If the user exists, the user identifier is returned.
+        operationId: doLogin
+        requestBody:
+          description: User details
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StatusInfo"
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: Maria
+                    pattern: 'ˆ.*?$'
+                    minLength: 3
+                    maxLength: 16
+          required: true
+        responses:
+          "201":
+            description: User log-in action successful
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    identifier:
+                    # change here if you decide to use an integer
+                    # or any other type of identifier
+                      type: string
+                      example: "abcdef012345"
+          "400":  
+            description: User log-in action failed 
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The server cannot or will not process the request due to an apparent client error
 
-  /:
-    get:
-      tags: ["Group 1"]
-      operationId: index
-      summary: Get an index
-      description: |-
-        This is an example of an index API description
-      responses:
-        "200":
-          description: Successful
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-  /context:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-    post:
-      tags: ["Group 1"]
-      operationId: getContext
-      summary: Another API example
-      description: |-
-        Example description 2
-      responses:
-        "200":
-          description: Request ok
-          headers:
-            X-Access-Token:
-              description: Access token for authenticated requests
-              schema: { type: string }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-  /authenticated:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-    get:
-      tags: ["Group 2"]
-      operationId: getAuthenticatedExample
-      summary: Get an endpoint with authentication
-      description: |-
-        Get an endpoint with auth
-      security:
-        - LegacyAuth: []
-        - AppToken: []
-      responses:
-        "200":
-          description: Logout successful
-        "500": { $ref: "#/components/responses/InternalServerError" }
+    /users/{userID}: #setMyUserName
+      parameters:
+            - name: userID
+              in: path
+              description: Require user identification ID
+              required: true
+              schema: 
+                type: integer
+      put: 
+        operationId: setMyUserName
+        summary: Set new username
+        description: |
+          Updates the exixsting resource userID.
+          All userIDs must be unique.
+          Setting a new userID require a already logged in user.
 
-  /pictures/{cat}:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-      - $ref: "#/components/parameters/cat"
-    get:
-      tags: ["Cat pictures"]
-      operationId: getCatFromPicture
-      summary: Example of a parameter in URL
-      description: |-
-        Example of a parameter in URL
-      security:
-        - LegacyAuth: []
-      responses:
-        "200":
-          description: Student picture found
-          content:
-            image/png:
+
+        requestBody:
+          description: Set new username
+          content: 
+            application/json:
               schema:
-                type: string
-                format: binary
-              example: Picture binary file
-        "404":
-          description: Student picture not found
-        "500": { $ref: "#/components/responses/InternalServerError" }
+                type: object
+                properties:
+                  name:
+                    type: string
+                    minLength: 3
+                    maxLength: 16
+                
+        responses:
+          "201":
+            description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: New username set successfully
+          "400":
+            description: Bad Request
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The server cannot or will not process the request due to an apparent client error
+          "401":
+            $ref: '#/components/responses/UnauthorizedError'
 
+    /users/{userID}/photo: 
+      parameters:
+          - name: userID
+            in: path
+            description: Require user identification code
+            required: true
+            schema: 
+              type: string
 
-  /autofeeder/{cat}:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-      - $ref: "#/components/parameters/cat"
-    put:
-      tags: ["Autofeeder"]
-      operationId: createCatAutofeeder
-      summary: Example of PUT operation
-      security:
-        - LegacyAuth: []
-      responses:
-        "200":
-          description: Auto feed enabled
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
-    delete:
-      tags: ["Autofeeder"]
-      operationId: deleteCatAutofeeder
-      summary: Example of DELETE operation
-      security:
-        - LegacyAuth: []
-      responses:
-        "200":
-          description: Auto feed disabled
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "500": { $ref: "#/components/responses/InternalServerError" }
+      post: #upload photo 
+        operationId: uploadPhoto
+        summary: Upload a new photo 
+        description: |
+          Submit a new resource.
+          Requires a logged in user.
+        requestBody:  
+          required: true
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                    photoID:
+                      type: integer
+                    ownerID: 
+                      type: integer
+                    image:
+                      type: string
+                      format: binary
+                    uploadDate:
+                      type: string
+                      format: time-date
+                      minLength: 3
+                      maxLength: 16
+        responses:
+          "200":
+            description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: New photo has been uploaded successfully
+          "400":
+            description: Bad Request
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The server cannot or will not process the request due to an apparent client error
+          "401":
+            $ref: '#/components/responses/UnauthorizedError'
 
-  /session/login:
-    parameters:
-      - $ref: "#/components/parameters/XAppBuild"
-      - $ref: "#/components/parameters/XAppVersion"
-      - $ref: "#/components/parameters/XAppLanguage"
-      - $ref: "#/components/parameters/XAppPlatform"
-    post:
-      tags: ["Session management"]
-      operationId: login
-      summary: Log-in into system
-      description: |-
-        Perform a log-in action using username and password credentials.
-        Returns a token which can be used in authenticated requests.
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
+      delete: #deletePhoto
+        operationId: deletePhoto
+        summary: Delete photo
+        description: |
+          Delete user's photo.
+          User must be logged in.
+          OwnerID on the photo must match requesting user's ID.
+        parameters:
+          - name: photoID
+            in: query
+            description: Requires photo ID 
+            required: true
             schema:
-              type: object
-              properties:
-                userid:
-                  type: string
-                  pattern: '^[a-zA-Z0-9]+$'
-                  minLength: 3
-                  maxLength: 255
-                password:
-                  type: string
-                  pattern: '^.*?$'
-                  minLength: 8
-                  maxLength: 255
-      responses:
-        "200":
-          description: Login successful
-          headers:
-            X-Access-Token:
-              description: Access token for authenticated requests
-              schema: { type: string }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "403":
-          description: Login failed
-          headers:
-            X-Message:
-              description: Error message
-              schema: { type: string }
-        "500": { $ref: "#/components/responses/InternalServerError" }
+              type: integer
+        responses:
+          "200":
+            description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The resource was successfully deleted 
 
+          "400":
+            description: Bad Request
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The server cannot or will not process the request due to an apparent client error
+          "401":
+            $ref: '#/components/responses/UnauthorizedError'
+
+          "403":
+            description: Failed
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: Forbidden 
+    
+    /photos/{photoID}/likes:
+      parameters:
+        - name: photoID
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: userID
+          in: query 
+          required: true
+          schema:
+            type: string
+
+      post: #likePhoto
+        operationId: likePhoto
+        summary: Like a photo
+        description: |
+          Like a user photo.
+          Users can like their own photos.
+          If user tries to like an already liked photo the request will be accepted but not processed.
+  
+        responses:
+          "200":
+            description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The photo was liked successfully
+          "400":
+            description: Bad Request
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The server cannot or will not process the request due to an apparent client error
+          "401":
+            $ref: '#/components/responses/UnauthorizedError'
+
+      delete: #unlikephoto
+        
+        operationId: unlikephoto
+        summary: Unlike photo
+        description: |
+          Delete user's like to a photo.
+          User must be logged in.
+          To remove a like the user's ID must be in the list of likes.
+
+        
+        responses:
+          "200":
+            description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The resource was successfully deleted 
+          "400":
+            description: Bad Request
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The server cannot or will not process the request due to an apparent client error   
+
+          "401":
+            $ref: '#/components/responses/UnauthorizedError'
+
+          "403":
+            description: Failed
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: Forbidden 
+
+    /photos/{photoID}/commments:      
+      parameters:
+      - name: photoID
+        in: path
+        required: true
+        schema:
+          type: integer
+      
+      - name: userID
+        in: query
+        required: true
+        schema:
+          type: string
+      post: #commentPhoto
+        operationId: commentPhoto
+        summary: Add a comment
+        description: |
+          Add a comment to an user photo.
+          User must be logged in.
+        
+        responses:
+          "200":
+            description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The comment inserted successfully
+          "400":
+            description: Bad Request
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The server cannot or will not process the request due to an apparent client error
+          "401":
+            $ref: '#/components/responses/UnauthorizedError'
+
+      delete: #uncomment photo
+        operationId: uncommentPhoto
+        summary: uncomment photo
+        description: |
+          Delete user's comment to a photo.
+          User must be logged in.
+          Only the Owner of a comment can remove it.
+        
+        responses:
+          "200":
+            description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The resource was successfully deleted 
+          "400":
+            description: Bad Request
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The server cannot or will not process the request due to an apparent client error   
+
+          "401":
+            $ref: '#/components/responses/UnauthorizedError'
+
+          "403":
+            description: Failed
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: Forbidden 
+
+    /users/{userID}/followers: 
+
+      parameters:
+        - name: userID
+          in: path
+          required: true
+          schema:
+            type: string
+        
+        - name: targetID
+          in: query
+          required: true
+          schema:
+            type: string
+      post:   #followUser
+        
+        operationId: followUser
+        summary: follow another user
+        description: |
+          User must be logged in.
+          A user can't follow another user if he is already in the follow list.
+        
+        
+        responses:
+          "200":
+            description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: User followed successfully
+          "400":
+            description: Bad Request
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The server cannot or will not process the request due to an apparent client error
+          "401":
+            $ref: '#/components/responses/UnauthorizedError'
+
+      delete: #unfollowUser
+        
+        operationId: unfollowUser
+        summary: unfollow an user.
+        description: |
+          Unfollows user from follower list.
+          User must be logged in.
+          To unfollow user must be in follower list. 
+
+        responses:
+          "200":
+            description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The resource was successfully deleted 
+          "400":
+            description: Bad Request
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The server cannot or will not process the request due to an apparent client error   
+
+          "401":
+            $ref: '#/components/responses/UnauthorizedError'
+
+          "403":
+            description: Failed
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: Forbidden 
+    
+    /users/{userID}/ban:
+      parameters:
+        - name: userID
+          in: path
+          required: true
+          schema:
+            type: string
+
+        - name: targetID
+          in: query
+          required: true
+          schema:
+            type: string
+      post: #banUser
+        operationId: banUser
+        summary: Ban another user
+        description: |
+          User must be logged in.
+          A user can't ban another user if he is already in the ban list.
+        
+        
+        responses:
+          "200":
+            description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: User banned successfully
+          "400":
+            description: Bad Request
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The server cannot or will not process the request due to an apparent client error
+          "401":
+            $ref: '#/components/responses/UnauthorizedError'
+      delete: #unbanUser
+        
+        operationId: unbanUser
+        summary: Unban another user
+        description: |
+          User must be logged in.
+          To remove an user from the list he must be put in it first.
+        responses:
+          "200":
+            description: Success
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: User unbanned successfully
+          "400":
+            description: Bad Request
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The server cannot or will not process the request due to an apparent client error
+          "401":
+            $ref: '#/components/responses/UnauthorizedError'
+          
+    /users/{userID}/profile:
+      parameters:
+        - name: userID
+          in: path
+          required: true
+          schema:   
+            type: string
+      get:
+        operationId: getUserProfile
+        summary: get user profile
+        description: |
+          Allows users to fetch their profile page details and others profile page.
+          It will show the user's photos, how many photos hav beenn uploaded, 
+          and the user's followers and following.
+        responses:
+          "200":
+            description: success 
+            content:
+              application/json:
+                schema: 
+                  type: object
+                  properties:
+                    photos: 
+                      type: array
+                      minItems: 0
+                      maxItems: 99999
+                      items: 
+                        type: object
+                        properties:
+                          photoID:
+                            type: integer
+                          image:
+                            type: string
+                            format: binary
+                            minLength: 3
+                            maxLength: 16
+                          uploadDate:
+                            type: string
+                            format: time-date
+                            minLength: 3
+                            maxLength: 16
+                    upNum:
+                      type: integer
+                    follower: 
+                      type: array
+                      minItems: 0
+                      maxItems: 99999
+                      items:
+                        type: object
+                        properties:
+                          username:   
+                            type: string
+
+                    following: 
+                      type: array
+                      minItems: 0
+                      maxItems: 99999
+                      items:
+                        type: object
+                        properties:
+                          username:   
+                            type: string
+          "400":
+            description: Bad Request
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The server cannot or will not process the request due to an apparent client error
+          "401":
+              $ref: '#/components/responses/UnauthorizedError'                 
+                 
+    /users/{userID}/stream: #getMyStream
+      parameters:
+        - name: userID
+          in: path
+          required: true
+          schema: 
+            type: string
+            
+      get:
+        operationId: getMyStream
+        summary: Present stream of photos
+        description: |
+          user will be presented with a stream of photos (images) in reverse chronological order, with
+          information about when each photo was uploaded (date and time) and how many likes and comments
+          it has.
+        responses:
+          "200":
+            description: success
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    photos: 
+                      type: array
+                      minItems: 0
+                      maxItems: 99999
+                      items:
+                        type: object
+                        properties:
+                          photoID:
+                            type: integer
+                          image:
+                            type: string
+                            format: binary
+                          uploadDate:
+                            type: string
+                            format: time-date
+                          likes:
+                            type: integer
+                          comments: 
+                            type: integer
+          "400":
+            description: Bad Request
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: The server cannot or will not process the request due to an apparent client error
+          "401":
+              $ref: '#/components/responses/UnauthorizedError'                  
+                        
 
 components:
-  schemas:
-    StatusInfo:
-      title: Status Info
-      type: object
-      properties:
-        status:
-          type: string
-          enum:
-            - info
-            - warning
-            - critical
-            - ""
-        title: { type: string }
-        message: { type: string }
-        url: { type: string }
-
-  responses:
-    Unauthorized:
-      description: The access token is missing or it's expired
-    BadRequest:
-      description: The request was not compliant with the documentation (eg. missing fields, etc)
-    InternalServerError:
-      description: The server encountered an internal error. Further info in server logs
-
   securitySchemes:
-    LegacyAuth:
-      type: apiKey
-      in: header
-      name: X-App-Token
-      description: |-
-        App session token value. This value is sent by the server in the login
-        and session refresh APIs.
+    bearerAuth:            
+      type: http
+      scheme: bearer
+      bearerFormat: JWT 
+  
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid 
 
-  parameters:
-    XAppVersion:
-      schema:
-        type: string
-        pattern: '^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
-        minLength: 1
-        maxLength: 10
-      name: X-App-Version
-      in: header
-      required: true
-      description: App human readable version ("semantic version" format)
-      allowEmptyValue: false
-    XAppBuild:
-      schema: { type: integer }
-      name: X-App-Build
-      in: header
-      required: true
-      description: App build number
-      allowEmptyValue: false
-    XAppLanguage:
-      schema:
-        type: string
-        pattern: '^[a-z]{2}([-_][A-Z]{2})?$'
-        minLength: 2
-        maxLength: 5
-      name: X-App-Language
-      in: header
-      required: true
-      description: App language in ISO 639-1 format
-      allowEmptyValue: false
-    XAppPlatform:
-      schema:
-        type: string
-        enum: [ios, android]
-      name: X-App-Platform
-      in: header
-      required: true
-      description: App operating system / platform
-      allowEmptyValue: false
-    cat:
-      schema:
-        type: string
-        pattern: '^[a-zA-Z]+$'
-        minLength: 3
-        maxLength: 10
-      name: cat
-      in: path
-      required: true
-      description: Cat
-      allowEmptyValue: false
+security: #apply the security globally to all operations
+  - bearerAuth: []  
+                    
