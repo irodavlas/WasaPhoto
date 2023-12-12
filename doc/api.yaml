@@ -58,8 +58,8 @@ paths:
               description: Require user identification ID
               required: true
               schema: 
-                type: integer
-      put: 
+                type: string
+      post: 
         operationId: setMyUserName
         summary: Set new username
         description: |
@@ -81,28 +81,12 @@ paths:
                     maxLength: 16
                 
         responses:
-          "201":
-            description: Success
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: New username set successfully
+          "200":
+            $ref: '#/components/responses/200'
           "400":
-            description: Bad Request
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The server cannot or will not process the request due to an apparent client error
+            $ref: '#/components/responses/400'
           "401":
-            $ref: '#/components/responses/UnauthorizedError'
+            $ref: '#/components/responses/401'
 
     /users/{userID}/photo: 
       parameters:
@@ -127,9 +111,9 @@ paths:
                 type: object
                 properties:
                     photoID:
-                      type: integer
+                      type: string
                     ownerID: 
-                      type: integer
+                      type: string
                     image:
                       type: string
                       format: binary
@@ -140,27 +124,11 @@ paths:
                       maxLength: 16
         responses:
           "200":
-            description: Success
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: New photo has been uploaded successfully
+            $ref: '#/components/responses/200'
           "400":
-            description: Bad Request
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The server cannot or will not process the request due to an apparent client error
+            $ref: '#/components/responses/400'
           "401":
-            $ref: '#/components/responses/UnauthorizedError'
+            $ref: '#/components/responses/401'
 
       delete: #deletePhoto
         operationId: deletePhoto
@@ -175,42 +143,14 @@ paths:
             description: Requires photo ID 
             required: true
             schema:
-              type: integer
+              type: string
         responses:
           "200":
-            description: Success
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The resource was successfully deleted 
-
+            $ref: '#/components/responses/200'
           "400":
-            description: Bad Request
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The server cannot or will not process the request due to an apparent client error
+            $ref: '#/components/responses/400'
           "401":
-            $ref: '#/components/responses/UnauthorizedError'
-
-          "403":
-            description: Failed
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: Forbidden 
+            $ref: '#/components/responses/401'
     
     /photos/{photoID}/likes:
       parameters:
@@ -218,7 +158,7 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
+            type: string
         - name: userID
           in: query 
           required: true
@@ -235,28 +175,11 @@ paths:
   
         responses:
           "200":
-            description: Success
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The photo was liked successfully
+            $ref: '#/components/responses/200'
           "400":
-            description: Bad Request
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The server cannot or will not process the request due to an apparent client error
+            $ref: '#/components/responses/400'
           "401":
-            $ref: '#/components/responses/UnauthorizedError'
-
+            $ref: '#/components/responses/401'
       delete: #unlikephoto
         
         operationId: unlikephoto
@@ -269,39 +192,11 @@ paths:
         
         responses:
           "200":
-            description: Success
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The resource was successfully deleted 
+            $ref: '#/components/responses/200'
           "400":
-            description: Bad Request
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The server cannot or will not process the request due to an apparent client error   
-
+            $ref: '#/components/responses/400'
           "401":
-            $ref: '#/components/responses/UnauthorizedError'
-
-          "403":
-            description: Failed
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: Forbidden 
+            $ref: '#/components/responses/401'
 
     /photos/{photoID}/commments:      
       parameters:
@@ -309,7 +204,7 @@ paths:
         in: path
         required: true
         schema:
-          type: integer
+          type: string
       
       - name: userID
         in: query
@@ -325,27 +220,11 @@ paths:
         
         responses:
           "200":
-            description: Success
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The comment inserted successfully
+            $ref: '#/components/responses/200'
           "400":
-            description: Bad Request
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The server cannot or will not process the request due to an apparent client error
+            $ref: '#/components/responses/400'
           "401":
-            $ref: '#/components/responses/UnauthorizedError'
+            $ref: '#/components/responses/401'
 
       delete: #uncomment photo
         operationId: uncommentPhoto
@@ -357,39 +236,11 @@ paths:
         
         responses:
           "200":
-            description: Success
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The resource was successfully deleted 
+            $ref: '#/components/responses/200'
           "400":
-            description: Bad Request
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The server cannot or will not process the request due to an apparent client error   
-
+            $ref: '#/components/responses/400'
           "401":
-            $ref: '#/components/responses/UnauthorizedError'
-
-          "403":
-            description: Failed
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: Forbidden 
+            $ref: '#/components/responses/401'
 
     /users/{userID}/followers: 
 
@@ -400,7 +251,7 @@ paths:
           schema:
             type: string
         
-        - name: targetID
+        - name: username
           in: query
           required: true
           schema:
@@ -416,27 +267,11 @@ paths:
         
         responses:
           "200":
-            description: Success
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: User followed successfully
+            $ref: '#/components/responses/200'
           "400":
-            description: Bad Request
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The server cannot or will not process the request due to an apparent client error
+            $ref: '#/components/responses/400'
           "401":
-            $ref: '#/components/responses/UnauthorizedError'
+            $ref: '#/components/responses/401'
 
       delete: #unfollowUser
         
@@ -449,39 +284,11 @@ paths:
 
         responses:
           "200":
-            description: Success
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The resource was successfully deleted 
+            $ref: '#/components/responses/200'
           "400":
-            description: Bad Request
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The server cannot or will not process the request due to an apparent client error   
-
+            $ref: '#/components/responses/400'
           "401":
-            $ref: '#/components/responses/UnauthorizedError'
-
-          "403":
-            description: Failed
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: Forbidden 
+            $ref: '#/components/responses/401'
     
     /users/{userID}/ban:
       parameters:
@@ -506,27 +313,11 @@ paths:
         
         responses:
           "200":
-            description: Success
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: User banned successfully
+            $ref: '#/components/responses/200'
           "400":
-            description: Bad Request
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The server cannot or will not process the request due to an apparent client error
+            $ref: '#/components/responses/400'
           "401":
-            $ref: '#/components/responses/UnauthorizedError'
+            $ref: '#/components/responses/401'
       delete: #unbanUser
         
         operationId: unbanUser
@@ -536,32 +327,16 @@ paths:
           To remove an user from the list he must be put in it first.
         responses:
           "200":
-            description: Success
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: User unbanned successfully
+            $ref: '#/components/responses/200'
           "400":
-            description: Bad Request
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The server cannot or will not process the request due to an apparent client error
+            $ref: '#/components/responses/400'
           "401":
-            $ref: '#/components/responses/UnauthorizedError'
+            $ref: '#/components/responses/401'
           
-    /users/{userID}/profile:
+    /users/profile:
       parameters:
-        - name: userID
-          in: path
+        - name: name
+          in: query
           required: true
           schema:   
             type: string
@@ -588,7 +363,7 @@ paths:
                         type: object
                         properties:
                           photoID:
-                            type: integer
+                            type: string
                           image:
                             type: string
                             format: binary
@@ -621,17 +396,9 @@ paths:
                           username:   
                             type: string
           "400":
-            description: Bad Request
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The server cannot or will not process the request due to an apparent client error
+              $ref: '#/components/responses/400'
           "401":
-              $ref: '#/components/responses/UnauthorizedError'                 
+              $ref: '#/components/responses/401'                 
                  
     /users/{userID}/stream: #getMyStream
       parameters:
@@ -676,17 +443,9 @@ paths:
                           comments: 
                             type: integer
           "400":
-            description: Bad Request
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The server cannot or will not process the request due to an apparent client error
+              $ref: '#/components/responses/400'
           "401":
-              $ref: '#/components/responses/UnauthorizedError'                  
+              $ref: '#/components/responses/401'                  
                         
 
 components:
@@ -697,9 +456,38 @@ components:
       bearerFormat: JWT 
   
   responses:
-    UnauthorizedError:
-      description: Access token is missing or invalid 
+    
+    '200':
+      description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: New username set successfully
 
+
+    '400':
+      description: Bad Request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: The server cannot or will not process the request due to an apparent client error
+    '401':
+          description: Unauthorized Access
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: Access token is missing or invalid 
 security: #apply the security globally to all operations
   - bearerAuth: []  
-                    

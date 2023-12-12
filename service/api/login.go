@@ -37,6 +37,12 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 			Id:       id,
 		}
 		Users = append(Users, user)
+		Profiles[id] = UserProfile{
+			User:      user,
+			Post:      make([]Photo, 0),
+			Follower:  make([]User, 0),
+			Following: make([]User, 0),
+		}
 
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(id)

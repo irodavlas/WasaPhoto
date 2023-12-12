@@ -4,9 +4,11 @@ import (
 	"errors"
 	"math/rand"
 	"net/http"
+	"time"
 )
 
 var Users = make([]User, 0)
+var Profiles = make(map[string]UserProfile)
 
 func checkLenght(username string) bool {
 	if len(username) < 3 || len(username) > 16 {
@@ -16,7 +18,7 @@ func checkLenght(username string) bool {
 }
 func decodeParams(r *http.Request) (*Params, error) {
 	p := new(Params)
-	username := r.FormValue("name")
+	username := r.FormValue("username")
 	if checkLenght(username) {
 		return nil, errors.New("Invalid params")
 	}
@@ -58,3 +60,23 @@ func changeUsername(id string, new string) {
 		}
 	}
 }
+
+func uploadPhotoParams(r *http.Request, id string) *Photo {
+
+	pic := new(Photo) //new returns a pointer to struct Photo
+	pic.PhotoID = len(Profiles[id].Post)
+	pic.Img = ""
+	pic.OwnerID = id
+	pic.UpDate = time.Now().GoString()
+
+	return pic
+}
+func checkFollowing(userId string, target *User) error {
+	for _, x := range Profiles[userId].Following {
+		if x.Username == target.Username {
+			return errors.New("Already following this user")
+		}
+	}
+	return nil
+}
+func getIndex(slice []User) int

@@ -1,4 +1,4 @@
-/*un applicaton 
+/*un applicaton
 Package api exposes the main API engine. All HTTP APIs are handled here - so-called "business logic" should be here, or
 in a dedicated package (if that logic is complex enough).
 
@@ -38,10 +38,11 @@ package api
 
 import (
 	"errors"
-	"git.sapienzaapps.it/fantasticcoffee/fantastic-coffee-decaffeinated/service/database"
+	"myproject/service/database"
+	"net/http"
+
 	"github.com/julienschmidt/httprouter"
 	"github.com/sirupsen/logrus"
-	"net/http"
 )
 
 // Config is used to provide dependencies and configuration to the New function.
