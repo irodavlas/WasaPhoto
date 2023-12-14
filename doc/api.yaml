@@ -23,7 +23,7 @@ paths:
                   name:
                     type: string
                     example: Maria
-                    pattern: 'ˆ.*?$'
+                    pattern: '^.*?$'
                     minLength: 3
                     maxLength: 16
           required: true
@@ -82,11 +82,11 @@ paths:
                 
         responses:
           "200":
-            $ref: '#/components/responses/200'
+            $ref: '#/components/responses/SuccessResponse'
           "400":
-            $ref: '#/components/responses/400'
+            $ref: '#/components/responses/BadRequestResponse'
           "401":
-            $ref: '#/components/responses/401'
+            $ref: '#/components/responses/UnauthorizedResponse'
 
     /users/{userID}/photo: 
       parameters:
@@ -119,16 +119,16 @@ paths:
                       format: binary
                     uploadDate:
                       type: string
-                      format: time-date
+                      format: date-time
                       minLength: 3
                       maxLength: 16
         responses:
           "200":
-            $ref: '#/components/responses/200'
+            $ref: '#/components/responses/SuccessResponse'
           "400":
-            $ref: '#/components/responses/400'
+            $ref: '#/components/responses/BadRequestResponse'
           "401":
-            $ref: '#/components/responses/401'
+            $ref: '#/components/responses/UnauthorizedResponse'
 
       delete: #deletePhoto
         operationId: deletePhoto
@@ -146,11 +146,11 @@ paths:
               type: string
         responses:
           "200":
-            $ref: '#/components/responses/200'
+            $ref: '#/components/responses/SuccessResponse'
           "400":
-            $ref: '#/components/responses/400'
+            $ref: '#/components/responses/BadRequestResponse'
           "401":
-            $ref: '#/components/responses/401'
+            $ref: '#/components/responses/UnauthorizedResponse'
     
     /photos/{photoID}/likes:
       parameters:
@@ -175,11 +175,11 @@ paths:
   
         responses:
           "200":
-            $ref: '#/components/responses/200'
+            $ref: '#/components/responses/SuccessResponse'
           "400":
-            $ref: '#/components/responses/400'
+            $ref: '#/components/responses/BadRequestResponse'
           "401":
-            $ref: '#/components/responses/401'
+            $ref: '#/components/responses/UnauthorizedResponse'
       delete: #unlikephoto
         
         operationId: unlikephoto
@@ -192,11 +192,11 @@ paths:
         
         responses:
           "200":
-            $ref: '#/components/responses/200'
+            $ref: '#/components/responses/SuccessResponse'
           "400":
-            $ref: '#/components/responses/400'
+            $ref: '#/components/responses/BadRequestResponse'
           "401":
-            $ref: '#/components/responses/401'
+            $ref: '#/components/responses/UnauthorizedResponse'
 
     /photos/{photoID}/commments:      
       parameters:
@@ -220,11 +220,11 @@ paths:
         
         responses:
           "200":
-            $ref: '#/components/responses/200'
+            $ref: '#/components/responses/SuccessResponse'
           "400":
-            $ref: '#/components/responses/400'
+            $ref: '#/components/responses/BadRequestResponse'
           "401":
-            $ref: '#/components/responses/401'
+            $ref: '#/components/responses/UnauthorizedResponse'
 
       delete: #uncomment photo
         operationId: uncommentPhoto
@@ -236,11 +236,11 @@ paths:
         
         responses:
           "200":
-            $ref: '#/components/responses/200'
+            $ref: '#/components/responses/SuccessResponse'
           "400":
-            $ref: '#/components/responses/400'
+            $ref: '#/components/responses/BadRequestResponse'
           "401":
-            $ref: '#/components/responses/401'
+            $ref: '#/components/responses/UnauthorizedResponse'
 
     /users/{userID}/followers: 
 
@@ -267,11 +267,11 @@ paths:
         
         responses:
           "200":
-            $ref: '#/components/responses/200'
+            $ref: '#/components/responses/SuccessResponse'
           "400":
-            $ref: '#/components/responses/400'
+            $ref: '#/components/responses/BadRequestResponse'
           "401":
-            $ref: '#/components/responses/401'
+            $ref: '#/components/responses/UnauthorizedResponse'
 
       delete: #unfollowUser
         
@@ -284,11 +284,11 @@ paths:
 
         responses:
           "200":
-            $ref: '#/components/responses/200'
+            $ref: '#/components/responses/SuccessResponse'
           "400":
-            $ref: '#/components/responses/400'
+            $ref: '#/components/responses/BadRequestResponse'
           "401":
-            $ref: '#/components/responses/401'
+            $ref: '#/components/responses/UnauthorizedResponse'
     
     /users/{userID}/ban:
       parameters:
@@ -313,11 +313,11 @@ paths:
         
         responses:
           "200":
-            $ref: '#/components/responses/200'
+            $ref: '#/components/responses/SuccessResponse'
           "400":
-            $ref: '#/components/responses/400'
+            $ref: '#/components/responses/BadRequestResponse'
           "401":
-            $ref: '#/components/responses/401'
+            $ref: '#/components/responses/UnauthorizedResponse'
       delete: #unbanUser
         
         operationId: unbanUser
@@ -327,11 +327,11 @@ paths:
           To remove an user from the list he must be put in it first.
         responses:
           "200":
-            $ref: '#/components/responses/200'
+            $ref: '#/components/responses/SuccessResponse'
           "400":
-            $ref: '#/components/responses/400'
+            $ref: '#/components/responses/BadRequestResponse'
           "401":
-            $ref: '#/components/responses/401'
+            $ref: '#/components/responses/UnauthorizedResponse'
           
     /users/profile:
       parameters:
@@ -358,7 +358,7 @@ paths:
                     photos: 
                       type: array
                       minItems: 0
-                      maxItems: 99999
+                      maxItems: 200
                       items: 
                         type: object
                         properties:
@@ -379,7 +379,7 @@ paths:
                     follower: 
                       type: array
                       minItems: 0
-                      maxItems: 99999
+                      maxItems: 200
                       items:
                         type: object
                         properties:
@@ -389,16 +389,16 @@ paths:
                     following: 
                       type: array
                       minItems: 0
-                      maxItems: 99999
+                      maxItems: 200
                       items:
                         type: object
                         properties:
                           username:   
                             type: string
           "400":
-              $ref: '#/components/responses/400'
+              $ref: '#/components/responses/SuccessResponse'
           "401":
-              $ref: '#/components/responses/401'                 
+              $ref: '#/components/responses/UnauthorizedResponse'                 
                  
     /users/{userID}/stream: #getMyStream
       parameters:
@@ -426,7 +426,7 @@ paths:
                     photos: 
                       type: array
                       minItems: 0
-                      maxItems: 99999
+                      maxItems: 200
                       items:
                         type: object
                         properties:
@@ -443,9 +443,9 @@ paths:
                           comments: 
                             type: integer
           "400":
-              $ref: '#/components/responses/400'
+              $ref: '#/components/responses/BadRequestResponse'
           "401":
-              $ref: '#/components/responses/401'                  
+              $ref: '#/components/responses/UnauthorizedResponse'                  
                         
 
 components:
@@ -457,7 +457,7 @@ components:
   
   responses:
     
-    '200':
+    SuccessResponse:
       description: Success
         content:
           application/json:
@@ -469,7 +469,7 @@ components:
                   description: New username set successfully
 
 
-    '400':
+    BadRequestResponse:
       description: Bad Request
         content:
           application/json:
@@ -479,7 +479,7 @@ components:
                 message:
                   type: string
                   description: The server cannot or will not process the request due to an apparent client error
-    '401':
+    UnauthorizedResponse:
           description: Unauthorized Access
             content:
               application/json:
