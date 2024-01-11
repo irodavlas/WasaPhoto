@@ -10,7 +10,11 @@ import (
 func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json")
 	var message string
+
+	//target user
 	user := new(User)
+
+	//user making the request
 	id := ps.ByName("userID")
 	_, err := checkId(id)
 	if err != nil {
@@ -34,6 +38,9 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 		json.NewEncoder(w).Encode(message)
 		return
 	}
-	//FollowingList := Profiles[id]
+	/*
+		var requester UserProfile
+		requester = Profiles[id]
+	*/
 
 }

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"errors"
 	"math/rand"
 	"net/http"
@@ -20,7 +21,7 @@ func decodeParams(r *http.Request) (*Params, error) {
 	p := new(Params)
 	username := r.FormValue("username")
 	if checkLenght(username) {
-		return nil, errors.New("Invalid params")
+		return nil, errors.New("invalid params")
 	}
 	p.Username = username
 	return p, nil
@@ -53,10 +54,10 @@ func generateId() string {
 
 }
 func changeUsername(id string, new string) {
-	for i, elem := range Users {
-		if elem.Id == id {
-			Users[i].Username = new
-			print(Users[i].Username)
+	for _, elem := range Profiles {
+		if elem.User.Id == id {
+			//cant assign to struct profiles
+
 		}
 	}
 }
@@ -74,9 +75,24 @@ func uploadPhotoParams(r *http.Request, id string) *Photo {
 func checkFollowing(userId string, target *User) error {
 	for _, x := range Profiles[userId].Following {
 		if x.Username == target.Username {
-			return errors.New("Already following this user")
+			return errors.New("already following this user")
 		}
 	}
 	return nil
 }
-func getIndex(slice []User) int
+func encodeResponse[T any](w http.ResponseWriter, message T, statusCode int) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	data := map[string]interface{}{
+		"code":    statusCode,
+		"message": message,
+	}
+	jsonData, err := json.MarshalIndent(data, "", "    ")
+	if err != nil {
+		return err
+	}
+	jsonData = append(jsonData, '\n') //just for sake of readability
+	w.Write(jsonData)                 //Grants better costumization over encoding, the input is []byte
+	return nil
+
+}

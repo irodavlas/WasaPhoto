@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -12,32 +11,39 @@ func (rt *_router) setNewUsername(w http.ResponseWriter, r *http.Request, ps htt
 	var message string
 
 	id := ps.ByName("userID")
+
 	_, err := checkId(id)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
 		message = "The server cannot or will not process the request due to an apparent client error"
-		json.NewEncoder(w).Encode(message)
+		err = encodeResponse(w, message, http.StatusUnauthorized)
+		if err != nil {
+			panic(err)
+		}
 		return
 	}
 
 	err = r.ParseForm()
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
 		message = "The server cannot or will not process the request due to an apparent client error"
-		json.NewEncoder(w).Encode(message)
+		err = encodeResponse(w, message, http.StatusBadRequest)
+		if err != nil {
+			panic(err)
+		}
 		return
 	}
 	p, err := decodeParams(r)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
 		message = "The server cannot or will not process the request due to an apparent client error"
-		json.NewEncoder(w).Encode(message)
+		err = encodeResponse(w, message, http.StatusBadRequest)
+		if err != nil {
+			panic(err)
+		}
 		return
 	}
 
-	changeUsername(id, p.Username)
-	w.WriteHeader(http.StatusOK)
-	message = "Success"
-	json.NewEncoder(w).Encode(message)
-
+	changeUsername(id, p.Username) //doesnt change the username in the Profiles
+	err = encodeResponse(w, p.Username, http.StatusOK)
+	if err != nil {
+		panic(err)
+	}
 }
