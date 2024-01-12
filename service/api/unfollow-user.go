@@ -1,46 +1,47 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
 )
 
 func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	w.Header().Set("Content-Type", "application/json")
-	var message string
 
-	//target user
+	var message string
 	user := new(User)
+	targetUser := new(User)
 
 	//user making the request
 	id := ps.ByName("userID")
-	_, err := checkId(id)
+	user, err := checkId(id)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
 		message = "Authorization has been refused for those credentials"
-		json.NewEncoder(w).Encode(message)
+		err := encodeResponse(w, message, http.StatusUnauthorized)
+		if err != nil {
+			panic(err)
+		}
 		return
 	}
 
-	user.Username = r.FormValue("username")
-	user.Id, err = checkUsername(user.Username)
+	targetUser.Username = r.FormValue("username")
+	targetUser, err = checkUsername(targetUser.Username)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
 		message = "The server cannot or will not process the request due to an apparent client error"
-		json.NewEncoder(w).Encode(message)
+		err := encodeResponse(w, message, http.StatusBadRequest)
+		if err != nil {
+			panic(err)
+		}
 		return
 	}
-	if err = checkFollowing(id, user); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		message = "The server cannot or will not process the request due to an apparent client error"
-		json.NewEncoder(w).Encode(message)
-		return
+
+	delete(Profiles[user.Id].Following, targetUser.Id)
+	delete(Profiles[targetUser.Id].Follower, user.Id)
+
+	message = "Success"
+	err = encodeResponse(w, message, http.StatusOK)
+	if err != nil {
+		panic(err)
 	}
-	/*
-		var requester UserProfile
-		requester = Profiles[id]
-	*/
 
 }

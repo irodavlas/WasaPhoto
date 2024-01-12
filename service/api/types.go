@@ -4,9 +4,6 @@ type User struct {
 	Username string
 	Id       string
 }
-type Params struct {
-	Username string
-}
 
 type Photo struct {
 	PhotoID int
@@ -16,8 +13,8 @@ type Photo struct {
 }
 
 type UserProfile struct {
-	User      User
+	User      *User
 	Post      []Photo
-	Follower  []User
-	Following []User
+	Follower  map[string]*User
+	Following map[string]*User
 }

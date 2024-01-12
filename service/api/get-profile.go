@@ -10,7 +10,7 @@ func (rt *_router) getProfile(w http.ResponseWriter, r *http.Request, ps httprou
 
 	var message string
 	username := r.FormValue("username")
-	id, err := checkUsername(username)
+	user, err := checkUsername(username)
 
 	if err != nil {
 		message = "The server cannot or will not process the request due to an apparent client error"
@@ -21,9 +21,13 @@ func (rt *_router) getProfile(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 
-	err = encodeResponse(w, Profiles[id], http.StatusOK)
+	err = encodeResponse(w, Profiles[user.Id], http.StatusOK)
 	if err != nil {
 		message = "internal server error"
 		encodeResponse(w, message, http.StatusInternalServerError)
+		if err != nil {
+			panic(err)
+		}
 	}
+
 }

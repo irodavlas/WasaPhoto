@@ -8,8 +8,7 @@ import (
 	"time"
 )
 
-var Users = make([]User, 0)
-var Profiles = make(map[string]UserProfile)
+var Profiles = make(map[string]*UserProfile)
 
 func checkLenght(username string) bool {
 	if len(username) < 3 || len(username) > 16 {
@@ -17,30 +16,29 @@ func checkLenght(username string) bool {
 	}
 	return false
 }
-func decodeParams(r *http.Request) (*Params, error) {
-	p := new(Params)
+func decodeParams(r *http.Request) (*User, error) {
+	user := new(User)
 	username := r.FormValue("username")
 	if checkLenght(username) {
 		return nil, errors.New("invalid params")
 	}
-	p.Username = username
-	return p, nil
+	user.Username = username
+	return user, nil
 }
-func checkId(id string) (string, error) {
-	for _, x := range Users {
-		if x.Id == id {
-			return x.Id, nil
+func checkId(id string) (*User, error) {
+	if Profiles[id] != nil {
+		return Profiles[id].User, nil
+	}
+	return nil, errors.New("username not found")
+}
+func checkUsername(username string) (*User, error) {
+	for _, profile := range Profiles {
+		if profile.User.Username == username {
+
+			return profile.User, nil
 		}
 	}
-	return "", errors.New("username not found")
-}
-func checkUsername(username string) (string, error) {
-	for _, x := range Users {
-		if x.Username == username {
-			return x.Id, nil
-		}
-	}
-	return "", errors.New("username not found")
+	return nil, errors.New("username not found")
 }
 
 func generateId() string {
@@ -53,14 +51,6 @@ func generateId() string {
 	return s
 
 }
-func changeUsername(id string, new string) {
-	for _, elem := range Profiles {
-		if elem.User.Id == id {
-			//cant assign to struct profiles
-
-		}
-	}
-}
 
 func uploadPhotoParams(r *http.Request, id string) *Photo {
 
@@ -72,14 +62,7 @@ func uploadPhotoParams(r *http.Request, id string) *Photo {
 
 	return pic
 }
-func checkFollowing(userId string, target *User) error {
-	for _, x := range Profiles[userId].Following {
-		if x.Username == target.Username {
-			return errors.New("already following this user")
-		}
-	}
-	return nil
-}
+
 func encodeResponse[T any](w http.ResponseWriter, message T, statusCode int) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
@@ -95,4 +78,14 @@ func encodeResponse[T any](w http.ResponseWriter, message T, statusCode int) err
 	w.Write(jsonData)                 //Grants better costumization over encoding, the input is []byte
 	return nil
 
+}
+
+func (P *User) changeUsername(username string) {
+	P.Username = username
+}
+func (Profile *UserProfile) checkFollowing(target *User) error {
+	if Profile.Following[target.Id] != nil {
+		return errors.New("already following")
+	}
+	return nil
 }
