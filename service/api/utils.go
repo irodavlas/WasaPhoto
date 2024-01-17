@@ -52,14 +52,15 @@ func generateId() string {
 
 }
 
-func uploadPhotoParams(r *http.Request, id string) *Photo {
+func uploadPhotoParams(id string) *Photo {
 
 	pic := new(Photo) //new returns a pointer to struct Photo
-	pic.PhotoID = len(Profiles[id].Post)
+	pic.PhotoID = generateId()
 	pic.Img = ""
 	pic.OwnerID = id
 	pic.UpDate = time.Now().GoString()
-
+	pic.Likes = make([]*User, 0)
+	pic.Comments = make([]*Comment, 0)
 	return pic
 }
 
@@ -84,8 +85,30 @@ func (P *User) changeUsername(username string) {
 	P.Username = username
 }
 func (Profile *UserProfile) checkFollowing(target *User) error {
-	if Profile.Following[target.Id] != nil {
+	if Profile.Following[target.Id] != nil || Profile.User.Id == target.Id {
 		return errors.New("already following")
+	}
+	return nil
+}
+
+func (Profile *UserProfile) checkBanList(target *User) error {
+	if Profile.Banned[target.Id] != nil || Profile.User.Id == target.Id {
+		return errors.New("already in banned list")
+	}
+	return nil
+}
+
+func (Profile *UserProfile) checkPost(picId string) error {
+	if Profile.Post[picId] == nil {
+		return errors.New("Post not found")
+	}
+	return nil
+}
+func (Profile *UserProfile) checkLikes(picId string, user *User) error {
+	for _, el := range Profile.Post[picId].Likes {
+		if el.Id == user.Id {
+			return errors.New("post already liked")
+		}
 	}
 	return nil
 }

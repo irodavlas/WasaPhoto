@@ -152,7 +152,7 @@ paths:
           "401":
             $ref: '#/components/responses/UnauthorizedResponse'
     
-    /photos/{photoID}/likes:
+    /photos/{userID}/{photoID}/likes:
       parameters:
         - name: photoID
           in: path
@@ -160,6 +160,11 @@ paths:
           schema:
             type: string
         - name: userID
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: username
           in: query 
           required: true
           schema:
@@ -459,35 +464,35 @@ components:
     
     SuccessResponse:
       description: Success
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  description: New username set successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: New username set successfully
 
 
     BadRequestResponse:
       description: Bad Request
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  description: The server cannot or will not process the request due to an apparent client error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: The server cannot or will not process the request due to an apparent client error
     UnauthorizedResponse:
-          description: Unauthorized Access
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: Access token is missing or invalid 
+      description: Unauthorized Access
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Access token is missing or invalid 
 security: #apply the security globally to all operations
   - bearerAuth: []  

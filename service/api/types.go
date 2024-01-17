@@ -6,15 +6,21 @@ type User struct {
 }
 
 type Photo struct {
-	PhotoID int
-	OwnerID string
-	Img     string
-	UpDate  string
+	PhotoID  string
+	OwnerID  string
+	Img      string
+	UpDate   string
+	Likes    []*User
+	Comments []*Comment
 }
-
+type Comment struct {
+	User    *User
+	message string
+}
 type UserProfile struct {
 	User      *User
-	Post      []Photo
+	Post      map[string]*Photo
 	Follower  map[string]*User
 	Following map[string]*User
+	Banned    map[string]*User
 }

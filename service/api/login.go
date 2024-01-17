@@ -44,9 +44,10 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 				Username: user.Username,
 				Id:       user.Id,
 			},
-			Post:      make([]Photo, 0),
+			Post:      make(map[string]*Photo),
 			Follower:  make(map[string]*User),
 			Following: make(map[string]*User),
+			Banned:    make(map[string]*User),
 		}
 
 		Profiles[user.Id] = &userProfile
