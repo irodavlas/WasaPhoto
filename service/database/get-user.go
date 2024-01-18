@@ -1,7 +1,12 @@
 package database
 
-func (db *appdbimpl) GetUser() (string, error) {
-	var name string
-	err := db.c.QueryRow("SELECT * FROM users WHERE name=user_01").Scan(&name)
-	return name, err
+import (
+	"myproject/service/api"
+)
+
+func (db *appdbimpl) GetUser(username string) (api.User, error) {
+	var user api.User
+	err := db.c.QueryRow("SELECT * FROM users WHERE username = $1", username).Scan(&user.Id, &user.Username)
+
+	return user, err
 }

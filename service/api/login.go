@@ -9,50 +9,39 @@ import (
 
 func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
-	var message string
-
 	err := r.ParseForm()
 	if err != nil {
-		fmt.Println(err)
-		message = "The server cannot or will not process the request due to an apparent client error"
+
+		message := "The server cannot or will not process the request due to an apparent client error"
 		err := encodeResponse(w, message, http.StatusBadRequest)
 		if err != nil {
 			panic(err)
 		}
+		fmt.Println(err)
 		return
 	}
 
-	user, err := decodeParams(r)
+	username, err := decodeQueryParams(r)
 	if err != nil {
-		fmt.Println(err)
-		message = "The server cannot or will not process the request due to an apparent client error"
+		message := "The server cannot or will not process the request due to an apparent client error"
 		err := encodeResponse(w, message, http.StatusBadRequest)
 		if err != nil {
 			panic(err)
 		}
+		fmt.Println(err)
 		return
 	}
 
-	token, err := checkUsername(user.Username)
+	token, err := isUserRegistered(username)
 	if err != nil {
-		var id string = generateId()
 
-		user.Id = id
+		id := generateGenericToken()
 
-		userProfile := UserProfile{
-			User: &User{
-				Username: user.Username,
-				Id:       user.Id,
-			},
-			Post:      make(map[string]*Photo),
-			Follower:  make(map[string]*User),
-			Following: make(map[string]*User),
-			Banned:    make(map[string]*User),
-		}
+		//create connection with database here to store each collumn
 
-		Profiles[user.Id] = &userProfile
+		user := NewUser(id, username)
 
-		err := encodeResponse(w, id, http.StatusCreated)
+		err := encodeResponse(w, user, http.StatusCreated)
 		if err != nil {
 			panic(err)
 		}

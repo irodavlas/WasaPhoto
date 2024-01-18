@@ -32,7 +32,10 @@ func (rt *_router) uploadPhoto(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 	pic := uploadPhotoParams(user.Id)
 
-	Profiles[user.Id].Post[pic.PhotoID] = pic
+	print(pic)
+	/*
+		Profiles[user.Id].Post[pic.PhotoID] = pic
+	*/
 	message = "photo uploaded succesfully"
 	err = encodeResponse(w, message, http.StatusOK)
 	if err != nil {

@@ -203,7 +203,7 @@ paths:
           "401":
             $ref: '#/components/responses/UnauthorizedResponse'
 
-    /photos/{photoID}/commments:      
+    /photos/{userID}/{photoID}/commments:      
       parameters:
       - name: photoID
         in: path
@@ -212,10 +212,15 @@ paths:
           type: string
       
       - name: userID
-        in: query
-        required: true
-        schema:
-          type: string
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: username
+          in: query 
+          required: true
+          schema:
+            type: string
       post: #commentPhoto
         operationId: commentPhoto
         summary: Add a comment

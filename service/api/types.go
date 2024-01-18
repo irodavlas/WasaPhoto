@@ -1,26 +1,37 @@
 package api
 
+import "time"
+
 type User struct {
-	Username string
-	Id       string
+	Id        string
+	Username  string
+	Post      []Post
+	Follower  []Follower
+	Following []Follower
+	Banned    []Follower
 }
 
-type Photo struct {
-	PhotoID  string
-	OwnerID  string
-	Img      string
-	UpDate   string
-	Likes    []*User
-	Comments []*Comment
+type Post struct {
+	PostId   string
+	OwnerId  string
+	photo    string
+	Likes    []uint64
+	Comments []Comment
+	time     time.Time
 }
 type Comment struct {
 	User    *User
 	message string
 }
-type UserProfile struct {
-	User      *User
-	Post      map[string]*Photo
-	Follower  map[string]*User
-	Following map[string]*User
-	Banned    map[string]*User
+
+type Follower struct {
+	Id       string
+	Username string
+}
+
+func NewUser(id string, username string) *User {
+	return &User{
+		Id:       id,
+		Username: username,
+	}
 }

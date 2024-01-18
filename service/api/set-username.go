@@ -30,7 +30,7 @@ func (rt *_router) setNewUsername(w http.ResponseWriter, r *http.Request, ps htt
 		}
 		return
 	}
-	newName, err := decodeParams(r)
+	newUsername, err := decodeQueryParams(r)
 	if err != nil {
 		message = "The server cannot or will not process the request due to an apparent client error"
 		err = encodeResponse(w, message, http.StatusBadRequest)
@@ -40,7 +40,7 @@ func (rt *_router) setNewUsername(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
-	user.changeUsername(newName.Username)
+	user.changeUsername(newUsername)
 
 	err = encodeResponse(w, user.Username, http.StatusOK)
 	if err != nil {

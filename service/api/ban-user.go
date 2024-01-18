@@ -22,7 +22,7 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 		return
 	}
 	targetUser.Username = r.FormValue("username")
-	targetUser, err = checkUsername(targetUser.Username)
+	targetUser, err = isUserRegistered(targetUser.Username)
 	if err != nil {
 		message = "The server cannot or will not process the request due to an apparent client error"
 		err := encodeResponse(w, message, http.StatusBadRequest)
@@ -39,11 +39,13 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 		}
 		return
 	}
-	Profiles[user.Id].Banned[targetUser.Id] = targetUser
-	if err = Profiles[user.Id].checkFollowing(targetUser); err != nil {
-		delete(Profiles[user.Id].Following, targetUser.Id)
-		delete(Profiles[targetUser.Id].Follower, user.Id)
-	}
+	/*
+		Profiles[user.Id].Banned[targetUser.Id] = targetUser
+		if err = Profiles[user.Id].checkFollowing(targetUser); err != nil {
+			delete(Profiles[user.Id].Following, targetUser.Id)
+			delete(Profiles[targetUser.Id].Follower, user.Id)
+		}
+	*/
 	message = "Success"
 	err = encodeResponse(w, message, http.StatusOK)
 	if err != nil {

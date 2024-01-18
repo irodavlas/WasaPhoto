@@ -12,6 +12,8 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 	user := new(User)
 	targetUser := new(User)
 
+	print(user)
+
 	//user making the request
 	id := ps.ByName("userID")
 	user, err := checkId(id)
@@ -25,7 +27,7 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 	}
 
 	targetUser.Username = r.FormValue("username")
-	targetUser, err = checkUsername(targetUser.Username)
+	targetUser, err = isUserRegistered(targetUser.Username)
 	if err != nil {
 		message = "The server cannot or will not process the request due to an apparent client error"
 		err := encodeResponse(w, message, http.StatusBadRequest)
@@ -34,10 +36,10 @@ func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httpr
 		}
 		return
 	}
-
-	delete(Profiles[user.Id].Following, targetUser.Id)
-	delete(Profiles[targetUser.Id].Follower, user.Id)
-
+	/*
+		delete(Profiles[user.Id].Following, targetUser.Id)
+		delete(Profiles[targetUser.Id].Follower, user.Id)
+	*/
 	message = "Success"
 	err = encodeResponse(w, message, http.StatusOK)
 	if err != nil {

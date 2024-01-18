@@ -33,7 +33,7 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 
 	username := r.FormValue("username")
-	liker, err := checkUsername(username)
+	liker, err := isUserRegistered(username)
 	if err != nil {
 		message = "The server cannot or will not process the request due to an apparent client error"
 		err := encodeResponse(w, message, http.StatusBadRequest)
@@ -44,7 +44,7 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 	}
 	err = Profiles[user.Id].checkLikes(photoId, liker)
 	if err == nil {
-		Profiles[user.Id].Post[photoId].Likes = append(Profiles[user.Id].Post[photoId].Likes, liker)
+		//Profiles[user.Id].Post[photoId].Likes = append(Profiles[user.Id].Post[photoId].Likes, liker)
 	}
 
 	//with the photo id search in the map and get the actual pointer to the photo

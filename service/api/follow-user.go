@@ -25,7 +25,7 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 	}
 
 	targetUser.Username = r.FormValue("username")
-	targetUser, err = checkUsername(targetUser.Username)
+	targetUser, err = isUserRegistered(targetUser.Username)
 	if err != nil {
 		message = "The server cannot or will not process the request due to an apparent client error"
 		err := encodeResponse(w, message, http.StatusBadRequest)
@@ -44,10 +44,10 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 		}
 		return
 	}
-
-	Profiles[user.Id].Following[targetUser.Id] = targetUser
-	Profiles[targetUser.Id].Follower[user.Id] = user
-
+	/*
+		Profiles[user.Id].Following[targetUser.Id] = targetUser
+		Profiles[targetUser.Id].Follower[user.Id] = user
+	*/
 	message = "Success"
 	err = encodeResponse(w, message, http.StatusOK)
 	if err != nil {
