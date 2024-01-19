@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"myproject/service/types"
+
 	"net/http"
 )
 
-var Profiles = make(map[string]User)
+var Profiles = make(map[string]types.User)
 
 func checkLenght(username string) bool {
 	if len(username) < 3 || len(username) > 16 {
@@ -25,20 +27,11 @@ func decodeQueryParams(r *http.Request) (string, error) {
 
 	return parameter, nil
 }
-func checkId(id string) (*User, error) {
-	/*
-		if Profiles[id] != nil {
-			return Profiles[id].User, nil
-		}
-		return nil, errors.New("username not found")
-	*/
-	return nil, nil
-}
-func (rt *_router) isUserRegistered(username string) (*User, error) {
+func (rt *_router) isUserRegistered(id, username string) (*types.User, error) {
 	//retrive info from db
 	//make return type to be a Use, for working use now ill write string
 
-	user, err := rt.db.GetUser(username)
+	user, err := rt.db.GetUser(id, username)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +53,7 @@ func generateGenericToken() string {
 
 }
 
-func uploadPhotoParams(id string) *Post {
+func uploadPhotoParams(id string) *types.Post {
 	/*
 		pic := new(Photo) //new returns a pointer to struct Photo
 		pic.PhotoID = generateGenericToken()
@@ -71,7 +64,7 @@ func uploadPhotoParams(id string) *Post {
 		pic.Comments = make([]*Comment, 0)
 		return pic
 	*/
-	return new(Post)
+	return new(types.Post)
 }
 
 func removeItem[T any](slice []T, index int) []T {
@@ -86,7 +79,7 @@ func removeItem[T any](slice []T, index int) []T {
 
 	return slice
 }
-func findIndex(slice []*User, id string) int {
+func findIndex(slice []*types.User, id string) int {
 	for i, user := range slice {
 		if user.Id == id {
 			return i
@@ -112,46 +105,48 @@ func encodeResponse[T any](w http.ResponseWriter, message T, statusCode int) err
 
 }
 
-func (P *User) changeUsername(username string) {
+/*
+func (P types.User) changeUsername(username string) {
 	P.Username = username
 }
 func (Profile User) checkFollowing(target *User) error {
-	/*
+
 		if Profile.Following[target.Id] != nil || Profile.User.Id == target.Id {
 			return errors.New("already following")
 		}
 		return nil
-	*/
+
 	return nil
 }
 
 func (Profile User) checkBanList(target *User) error {
-	/*
+
 		if Profile.Banned[target.Id] != nil || Profile.User.Id == target.Id {
 			return errors.New("already in banned list")
 		}
 		return nil
-	*/
+
 	return nil
 }
 
 func (Profile User) checkPost(picId string) error {
-	/*
+
 		if Profile.Post[picId] == nil {
 			return errors.New("Post not found")
 		}
 		return nil
-	*/
+
 	return nil
 }
 func (Profile User) checkLikes(picId string, user *User) error {
-	/*
+
 		for _, el := range Profile.Post[picId].Likes {
 			if el.Id == user.Id {
 				return errors.New("post already liked")
 			}
 		}
 		return nil
-	*/
+
 	return nil
 }
+*/

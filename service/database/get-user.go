@@ -1,12 +1,10 @@
 package database
 
-import (
-	"myproject/service/api"
-)
+import "myproject/service/types"
 
-func (db *appdbimpl) GetUser(username string) (api.User, error) {
-	var user api.User
-	err := db.c.QueryRow("SELECT * FROM users WHERE username = $1", username).Scan(&user.Id, &user.Username)
+func (db *appdbimpl) GetUser(id string, username string) (types.User, error) {
+	var user types.User
+	err := db.c.QueryRow("SELECT * FROM users WHERE username = %s or id = %s", username, id).Scan(&user.Id, &user.Username)
 
 	return user, err
 }

@@ -10,7 +10,7 @@ func (rt *_router) getProfile(w http.ResponseWriter, r *http.Request, ps httprou
 
 	var message string
 	username := r.FormValue("username")
-	user, err := isUserRegistered(username)
+	user, err := rt.isUserRegistered("", username)
 	print(user)
 	if err != nil {
 		message = "The server cannot or will not process the request due to an apparent client error"
@@ -21,7 +21,7 @@ func (rt *_router) getProfile(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 	//redefine response
-	err = encodeResponse(w, "Profiles[user.Id]", http.StatusOK)
+	err = encodeResponse(w, user, http.StatusOK)
 	if err != nil {
 		message = "internal server error"
 		encodeResponse(w, message, http.StatusInternalServerError)

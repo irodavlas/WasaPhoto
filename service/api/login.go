@@ -2,6 +2,8 @@ package api
 
 import (
 	"fmt"
+	"myproject/service/types"
+
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -11,7 +13,6 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 
 	err := r.ParseForm()
 	if err != nil {
-
 		message := "The server cannot or will not process the request due to an apparent client error"
 		err := encodeResponse(w, message, http.StatusBadRequest)
 		if err != nil {
@@ -20,7 +21,6 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 		fmt.Println(err)
 		return
 	}
-
 	username, err := decodeQueryParams(r)
 	if err != nil {
 		message := "The server cannot or will not process the request due to an apparent client error"
@@ -31,16 +31,18 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 		fmt.Println(err)
 		return
 	}
-
-	token, err := isUserRegistered(username)
+	user, err := rt.isUserRegistered("", username)
 	if err != nil {
 
-		id := generateGenericToken()
-
-		//create connection with database here to store each collumn
-
-		user := NewUser(id, username)
-
+		user := types.User{
+			Id:       generateGenericToken(),
+			Username: username,
+		}
+		//db function call
+		err = rt.db.InsertUser(user)
+		if err != nil {
+			panic(err)
+		}
 		err := encodeResponse(w, user, http.StatusCreated)
 		if err != nil {
 			panic(err)
@@ -48,7 +50,7 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 		return
 	}
 
-	err = encodeResponse(w, token, http.StatusOK)
+	err = encodeResponse(w, user.Id, http.StatusOK)
 	if err != nil {
 		panic(err)
 	}

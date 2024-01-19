@@ -34,13 +34,15 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"myproject/service/types"
 )
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
 	GetName() (string, error)
 	SetName(name string) error
-	GetUser(id string) (User, error)
+	GetUser(id string, username string) (types.User, error)
+	InsertUser(user types.User) error
 	Ping() error
 }
 
