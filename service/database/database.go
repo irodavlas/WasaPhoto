@@ -43,6 +43,19 @@ type AppDatabase interface {
 	SetName(name string) error
 	GetUser(id string, username string) (types.User, error)
 	InsertUser(user types.User) error
+	InsertFollower(userId string, followerId string) error
+	RemoveFollow(followerId string, userId string) error
+	InsertPost(post types.Post) error
+	RemovePost(ownerId string, postId string) error
+	BanUser(bannedUserId string, userId string) error
+	InsertLike(likeid string, postId string, user types.User) error
+	RemoveLike(postId string, likerId string) error
+	InsertComment(commentId string, postId string, viewerId string, content string) error
+	RemoveComment(postId string, ownerId string, commentId string) error
+	UpdateUsername(id string, newUsername string) error
+	RevokeBan(profile types.User, viewerId string) error
+	GetFeed(user types.User) (*types.Feed, error)
+	GetProfile(targetUser types.User, authUserId string) (*types.User, error)
 	Ping() error
 }
 

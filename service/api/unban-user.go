@@ -7,44 +7,37 @@ import (
 )
 
 func (rt *_router) unBanUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var message string
-	targetUser := new(User)
-	user := new(User)
-
-	id := ps.ByName("userID")
-	user, err := checkId(id)
+	authorizationHeader := r.Header.Get("Authorization")
+	user, err := rt.isTokenValid(authorizationHeader)
 	if err != nil {
-		message = "Authorization has been refused for those credentials"
-		err := encodeResponse(w, message, http.StatusUnauthorized)
-		if err != nil {
-			panic(err)
-		}
+		message := "Session token not valid"
+		encodeResponse(w, message, http.StatusUnauthorized)
 		return
 	}
-	targetUser.Username = r.FormValue("username")
-	targetUser, err = isUserRegistered(targetUser.Username)
+	err = r.ParseForm()
 	if err != nil {
-		message = "The server cannot or will not process the request due to an apparent client error"
-		err := encodeResponse(w, message, http.StatusBadRequest)
-		if err != nil {
-			panic(err)
-		}
+		message := "The server cannot or will not process the request due to an apparent client error"
+		encodeResponse(w, message, http.StatusBadRequest)
 		return
 	}
-	if err = Profiles[user.Id].checkBanList(targetUser); err == nil {
-		message = "The server cannot or will not process the request due to an apparent client error"
-		err := encodeResponse(w, message, http.StatusBadRequest)
-		if err != nil {
-			panic(err)
-		}
+	username, err := decodeQueryParamsUsername(r)
+	if err != nil {
+		message := "The server cannot or will not process the request due to an apparent client error"
+		encodeResponse(w, message, http.StatusBadRequest)
 		return
 	}
-	/*
-		delete(Profiles[user.Id].Banned, targetUser.Id)
-	*/
-	message = "Success"
-	err = encodeResponse(w, message, http.StatusOK)
+	targetUser, err := rt.isUserRegistered("", username)
 	if err != nil {
-		panic(err)
+		message := "The server cannot or will not process the request due to an apparent client error"
+		encodeResponse(w, message, http.StatusBadRequest)
+		return
 	}
+	err = rt.db.RevokeBan(*targetUser, user.Id)
+	if err != nil {
+		message := "internal server error"
+		encodeResponse(w, message, http.StatusInternalServerError)
+		return
+	}
+	message := "Success"
+	encodeResponse(w, message, http.StatusOK)
 }

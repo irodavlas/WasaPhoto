@@ -8,19 +8,21 @@ import (
 func (rt *_router) Handler() http.Handler {
 	// Register routes
 
-	rt.router.POST("/users/:userID", rt.setNewUsername)
+	rt.router.POST("/users/profile/username", rt.setNewUsername)
 	rt.router.GET("/context", rt.wrap(rt.getContextReply))
-	rt.router.POST("/doLogin", rt.doLogin)
-	/*
-		rt.router.POST("/users/:userID/photo", rt.uploadPhoto)
-		rt.router.GET("/users/profile", rt.getProfile)
-		rt.router.POST("/users/:userID/followers", rt.followUser)
-		rt.router.DELETE("/users/:userID/followers", rt.unfollowUser)
-		rt.router.POST("/users/:userID/ban", rt.banUser)
-		rt.router.DELETE("/users/:userID/ban", rt.unBanUser)
-		rt.router.POST("/photos/:userID/:photoID/likes", rt.likePhoto)
-		rt.router.DELETE("/photos/:userID/:photoID/likes", rt.unLikePhoto)
-	*/
+	rt.router.POST("/session", rt.doLogin)
+	rt.router.GET("/users/profile", rt.getProfile)
+	rt.router.POST("/users/profile/followers", rt.followUser)
+	rt.router.DELETE("/users/profile/followers", rt.unfollowUser)
+	rt.router.POST("/users/profile/post", rt.uploadPhoto)
+	rt.router.DELETE("/users/profile/post", rt.removePost)
+	rt.router.POST("/post/like", rt.likePhoto)       //passes photo id in the query params
+	rt.router.POST("/users/profile/ban", rt.banUser) //username passed in the query
+	rt.router.DELETE("/users/profile/ban", rt.unBanUser)
+	rt.router.DELETE("/post/like", rt.unLikePhoto)
+	rt.router.POST("/post/comment", rt.addComment)
+	rt.router.DELETE("/post/comment", rt.removeComment)
+	rt.router.GET("/users/profile/feed", rt.getFeed)
 	// Special routes
 	rt.router.GET("/liveness", rt.liveness)
 

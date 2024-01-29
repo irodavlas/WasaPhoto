@@ -1,12 +1,15 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/julienschmidt/httprouter"
 )
 
-func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (rt *_router) removePost(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	authorizationHeader := r.Header.Get("Authorization")
 	user, err := rt.isTokenValid(authorizationHeader)
 	if err != nil {
@@ -20,26 +23,23 @@ func (rt *_router) followUser(w http.ResponseWriter, r *http.Request, ps httprou
 		encodeResponse(w, message, http.StatusBadRequest)
 		return
 	}
-	username, err := decodeQueryParamsUsername(r)
-	if err != nil {
-		message := "The server cannot or will not process the request due to an apparent client error"
-		encodeResponse(w, message, http.StatusBadRequest)
-		return
-	}
-	targetUser, err := rt.isUserRegistered("", username)
+	//this should be passed by the fe (being the name of the pic)
+	postId := decodeQueryParamsPostId(r)
+	err = rt.db.RemovePost(user.Id, postId)
 	if err != nil {
 		message := "The server cannot or will not process the request due to an apparent client error"
 		encodeResponse(w, message, http.StatusBadRequest)
 		return
 	}
 
-	err = rt.db.InsertFollower(targetUser.Id, user.Id)
+	imagesDir := "./service/images"
+	fileToDelete := postId + ".jpg"
+	filePathToDelete := filepath.Join(imagesDir, fileToDelete)
+	err = os.Remove(filePathToDelete)
 	if err != nil {
-		message := "Internal server error"
-		encodeResponse(w, message, http.StatusInternalServerError)
-		return
+		fmt.Println("Error:", err)
 	}
-
 	message := "Success"
 	encodeResponse(w, message, http.StatusOK)
+
 }

@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"myproject/service/types"
 
 	"net/http"
@@ -10,49 +9,33 @@ import (
 )
 
 func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	//sauthorizationHeader := r.Header.Get("Authorization")
 
 	err := r.ParseForm()
 	if err != nil {
 		message := "The server cannot or will not process the request due to an apparent client error"
-		err := encodeResponse(w, message, http.StatusBadRequest)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(err)
+		encodeResponse(w, message, http.StatusBadRequest)
 		return
 	}
-	username, err := decodeQueryParams(r)
+	username, err := decodeQueryParamsUsername(r)
 	if err != nil {
 		message := "The server cannot or will not process the request due to an apparent client error"
-		err := encodeResponse(w, message, http.StatusBadRequest)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(err)
+		encodeResponse(w, message, http.StatusBadRequest)
 		return
 	}
 	user, err := rt.isUserRegistered("", username)
 	if err != nil {
+		user := types.NewUser(generateGenericToken(), username)
 
-		user := types.User{
-			Id:       generateGenericToken(),
-			Username: username,
-		}
 		//db function call
-		err = rt.db.InsertUser(user)
+		err = rt.db.InsertUser(*user)
 		if err != nil {
-			panic(err)
+			message := "Internal server error"
+			encodeResponse(w, message, http.StatusInternalServerError)
+			return
 		}
-		err := encodeResponse(w, user, http.StatusCreated)
-		if err != nil {
-			panic(err)
-		}
+		encodeResponse(w, user, http.StatusCreated)
 		return
 	}
-
-	err = encodeResponse(w, user.Id, http.StatusOK)
-	if err != nil {
-		panic(err)
-	}
-
+	encodeResponse(w, user.Id, http.StatusOK)
 }

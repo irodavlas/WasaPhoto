@@ -4,7 +4,7 @@ info:
   version: '0.0.1'
   description: This API allows users to upload and manage their images and informations
 paths:
-    /session: #doLogin
+    /session:
       post:
         tags: ["login"]
         summary: Logs in the user
@@ -23,7 +23,7 @@ paths:
                   name:
                     type: string
                     example: Maria
-                    pattern: '^.*?$'
+                    pattern: ˆ.*?$
                     minLength: 3
                     maxLength: 16
           required: true
@@ -40,22 +40,14 @@ paths:
                     # or any other type of identifier
                       type: string
                       example: "abcdef012345"
-          "400":  
-            description: User log-in action failed 
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: The server cannot or will not process the request due to an apparent client error
+          "400":
+            $ref: '#/components/responses/BadRequestResponse'
 
-    /users/{userID}: #setMyUserName
+    /users/profile/username: #setMyUserName
       parameters:
-            - name: userID
-              in: path
-              description: Require user identification ID
+            - name: username
+              in: query
+              description: Require user new username 
               required: true
               schema: 
                 type: string
@@ -87,16 +79,10 @@ paths:
             $ref: '#/components/responses/BadRequestResponse'
           "401":
             $ref: '#/components/responses/UnauthorizedResponse'
+          "500":
+            $ref: '#/components/responses/InternalServerError'
 
-    /users/{userID}/photo: 
-      parameters:
-          - name: userID
-            in: path
-            description: Require user identification code
-            required: true
-            schema: 
-              type: string
-
+    /users/profile/post: 
       post: #upload photo 
         operationId: uploadPhoto
         summary: Upload a new photo 
@@ -110,40 +96,35 @@ paths:
               schema: 
                 type: object
                 properties:
-                    photoID:
-                      type: string
-                    ownerID: 
-                      type: string
                     image:
                       type: string
-                      format: binary
-                    uploadDate:
-                      type: string
-                      format: date-time
-                      minLength: 3
-                      maxLength: 16
+                      description: Binary image data
         responses:
           "200":
             $ref: '#/components/responses/SuccessResponse'
+          "201":
+            $ref: '#/components/responses/CreatedResponse'
           "400":
             $ref: '#/components/responses/BadRequestResponse'
           "401":
             $ref: '#/components/responses/UnauthorizedResponse'
+          "500":
+            $ref: '#/components/responses/InternalServerError'
 
       delete: #deletePhoto
+        parameters:
+        - name: postId
+          in: query
+          required: true
+          schema:
+            type: string
         operationId: deletePhoto
         summary: Delete photo
         description: |
           Delete user's photo.
           User must be logged in.
           OwnerID on the photo must match requesting user's ID.
-        parameters:
-          - name: photoID
-            in: query
-            description: Requires photo ID 
-            required: true
-            schema:
-              type: string
+
         responses:
           "200":
             $ref: '#/components/responses/SuccessResponse'
@@ -152,20 +133,10 @@ paths:
           "401":
             $ref: '#/components/responses/UnauthorizedResponse'
     
-    /photos/{userID}/{photoID}/likes:
+    /post/like:
       parameters:
-        - name: photoID
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: userID
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: username
-          in: query 
+        - name: postId
+          in: query
           required: true
           schema:
             type: string
@@ -187,7 +158,7 @@ paths:
             $ref: '#/components/responses/UnauthorizedResponse'
       delete: #unlikephoto
         
-        operationId: unlikephoto
+        operationId: unlikePhoto
         summary: Unlike photo
         description: |
           Delete user's like to a photo.
@@ -203,24 +174,15 @@ paths:
           "401":
             $ref: '#/components/responses/UnauthorizedResponse'
 
-    /photos/{userID}/{photoID}/commments:      
+    /post/commment:      
       parameters:
-      - name: photoID
-        in: path
+      - name: postId
+        in: query
         required: true
         schema:
           type: string
       
-      - name: userID
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: username
-          in: query 
-          required: true
-          schema:
-            type: string
+      
       post: #commentPhoto
         operationId: commentPhoto
         summary: Add a comment
@@ -235,8 +197,17 @@ paths:
             $ref: '#/components/responses/BadRequestResponse'
           "401":
             $ref: '#/components/responses/UnauthorizedResponse'
+          "500":
+            $ref: '#/components/responses/InternalServerError'
 
       delete: #uncomment photo
+        parameters:
+        - name: commmentId
+          in: query
+          required: true
+          schema:
+            type: string
+            
         operationId: uncommentPhoto
         summary: uncomment photo
         description: |
@@ -251,21 +222,18 @@ paths:
             $ref: '#/components/responses/BadRequestResponse'
           "401":
             $ref: '#/components/responses/UnauthorizedResponse'
+          "500":
+            $ref: '#/components/responses/InternalServerError'
 
-    /users/{userID}/followers: 
+    /users/profile/followers: 
 
       parameters:
-        - name: userID
-          in: path
-          required: true
-          schema:
-            type: string
-        
         - name: username
           in: query
           required: true
           schema:
             type: string
+        
       post:   #followUser
         
         operationId: followUser
@@ -282,7 +250,8 @@ paths:
             $ref: '#/components/responses/BadRequestResponse'
           "401":
             $ref: '#/components/responses/UnauthorizedResponse'
-
+          "500":
+            $ref: '#/components/responses/InternalServerError'
       delete: #unfollowUser
         
         operationId: unfollowUser
@@ -299,20 +268,17 @@ paths:
             $ref: '#/components/responses/BadRequestResponse'
           "401":
             $ref: '#/components/responses/UnauthorizedResponse'
+          "500":
+            $ref: '#/components/responses/InternalServerError'
     
-    /users/{userID}/ban:
+    /users/profile/ban:
       parameters:
-        - name: userID
-          in: path
-          required: true
-          schema:
-            type: string
-
-        - name: targetID
+        - name: username
           in: query
           required: true
           schema:
             type: string
+
       post: #banUser
         operationId: banUser
         summary: Ban another user
@@ -328,6 +294,8 @@ paths:
             $ref: '#/components/responses/BadRequestResponse'
           "401":
             $ref: '#/components/responses/UnauthorizedResponse'
+          "500":
+            $ref: '#/components/responses/InternalServerError'
       delete: #unbanUser
         
         operationId: unbanUser
@@ -342,10 +310,12 @@ paths:
             $ref: '#/components/responses/BadRequestResponse'
           "401":
             $ref: '#/components/responses/UnauthorizedResponse'
+          "500":
+            $ref: '#/components/responses/InternalServerError'
           
     /users/profile:
       parameters:
-        - name: name
+        - name: username
           in: query
           required: true
           schema:   
@@ -365,20 +335,22 @@ paths:
                 schema: 
                   type: object
                   properties:
-                    photos: 
+                    post: 
                       type: array
                       minItems: 0
                       maxItems: 200
                       items: 
                         type: object
                         properties:
-                          photoID:
+                          postID:
+                            type: string
+                          ownerId:
+                            type: string
+                          ownerUsername:
                             type: string
                           image:
                             type: string
                             format: binary
-                            minLength: 3
-                            maxLength: 16
                           uploadDate:
                             type: string
                             format: time-date
@@ -393,6 +365,8 @@ paths:
                       items:
                         type: object
                         properties:
+                          id:
+                            type: string
                           username:   
                             type: string
 
@@ -403,21 +377,19 @@ paths:
                       items:
                         type: object
                         properties:
+                          id:
+                            type: string
                           username:   
                             type: string
           "400":
               $ref: '#/components/responses/SuccessResponse'
           "401":
-              $ref: '#/components/responses/UnauthorizedResponse'                 
+              $ref: '#/components/responses/UnauthorizedResponse'      
+          "500":
+            $ref: '#/components/responses/InternalServerError'           
                  
-    /users/{userID}/stream: #getMyStream
-      parameters:
-        - name: userID
-          in: path
-          required: true
-          schema: 
-            type: string
-            
+    /users/profile/feed: #getMyStream
+  
       get:
         operationId: getMyStream
         summary: Present stream of photos
@@ -433,29 +405,34 @@ paths:
                 schema:
                   type: object
                   properties:
-                    photos: 
+                    post: 
                       type: array
                       minItems: 0
                       maxItems: 200
-                      items:
+                      items: 
                         type: object
                         properties:
-                          photoID:
-                            type: integer
+                          postID:
+                            type: string
+                          ownerId:
+                            type: string
+                          ownerUsername:
+                            type: string
                           image:
                             type: string
                             format: binary
                           uploadDate:
                             type: string
                             format: time-date
-                          likes:
-                            type: integer
-                          comments: 
-                            type: integer
+                            minLength: 3
+                            maxLength: 16
+                          
           "400":
               $ref: '#/components/responses/BadRequestResponse'
           "401":
-              $ref: '#/components/responses/UnauthorizedResponse'                  
+              $ref: '#/components/responses/UnauthorizedResponse'       
+          "500":
+            $ref: '#/components/responses/InternalServerError'           
                         
 
 components:
@@ -466,7 +443,6 @@ components:
       bearerFormat: JWT 
   
   responses:
-    
     SuccessResponse:
       description: Success
       content:
@@ -477,8 +453,16 @@ components:
               message:
                 type: string
                 description: New username set successfully
-
-
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Internal server error
     BadRequestResponse:
       description: Bad Request
       content:
@@ -489,6 +473,17 @@ components:
               message:
                 type: string
                 description: The server cannot or will not process the request due to an apparent client error
+    CreatedResponse:
+      description: Creation of resource successful
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Resource created
+
     UnauthorizedResponse:
       description: Unauthorized Access
       content:
@@ -498,6 +493,6 @@ components:
             properties:
               message:
                 type: string
-                description: Access token is missing or invalid 
+                description: Access token is missing or invalid
 security: #apply the security globally to all operations
   - bearerAuth: []  

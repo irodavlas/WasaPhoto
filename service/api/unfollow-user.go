@@ -7,43 +7,36 @@ import (
 )
 
 func (rt *_router) unfollowUser(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
-	var message string
-	user := new(User)
-	targetUser := new(User)
-
-	print(user)
-
-	//user making the request
-	id := ps.ByName("userID")
-	user, err := checkId(id)
+	authorizationHeader := r.Header.Get("Authorization")
+	user, err := rt.isTokenValid(authorizationHeader)
 	if err != nil {
-		message = "Authorization has been refused for those credentials"
-		err := encodeResponse(w, message, http.StatusUnauthorized)
-		if err != nil {
-			panic(err)
-		}
+		message := "Session token not valid"
+		encodeResponse(w, message, http.StatusUnauthorized)
 		return
 	}
-
-	targetUser.Username = r.FormValue("username")
-	targetUser, err = isUserRegistered(targetUser.Username)
+	err = r.ParseForm()
 	if err != nil {
-		message = "The server cannot or will not process the request due to an apparent client error"
-		err := encodeResponse(w, message, http.StatusBadRequest)
-		if err != nil {
-			panic(err)
-		}
+		message := "The server cannot or will not process the request due to an apparent client error"
+		encodeResponse(w, message, http.StatusBadRequest)
 		return
 	}
-	/*
-		delete(Profiles[user.Id].Following, targetUser.Id)
-		delete(Profiles[targetUser.Id].Follower, user.Id)
-	*/
-	message = "Success"
-	err = encodeResponse(w, message, http.StatusOK)
+	username, err := decodeQueryParamsUsername(r)
 	if err != nil {
-		panic(err)
+		message := "The server cannot or will not process the request due to an apparent client error"
+		encodeResponse(w, message, http.StatusBadRequest)
+		return
 	}
-
+	targetUser, err := rt.isUserRegistered("", username)
+	if err != nil {
+		message := "The server cannot or will not process the request due to an apparent client error"
+		encodeResponse(w, message, http.StatusBadRequest)
+		return
+	}
+	err = rt.db.RemoveFollow(user.Id, targetUser.Id)
+	if err != nil {
+		encodeResponse(w, err, http.StatusInternalServerError)
+		return
+	}
+	message := "Success"
+	encodeResponse(w, message, http.StatusOK)
 }
