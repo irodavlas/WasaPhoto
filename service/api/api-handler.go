@@ -25,6 +25,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.PUT("/ban/:userId", rt.banUser)
 	rt.router.DELETE("/ban/:userId", rt.unBanUser)
 
+	// get
 	rt.router.GET("/users/:userId/profile", rt.getProfile)
 	rt.router.GET("/profile/feed", rt.getFeed)
 
