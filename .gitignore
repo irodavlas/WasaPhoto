@@ -12,3 +12,4 @@ docker-compose.log
 /doc/json
 /doc/markdown
 
+test.db
