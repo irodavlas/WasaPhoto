@@ -14,9 +14,10 @@ func (rt *_router) unBanUser(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 	targetUsername := ps.ByName("username")
+
 	targetUser, err := rt.isUserRegistered("", targetUsername)
 	if err != nil {
-		encodeResponse(w, Msg400, http.StatusBadRequest)
+		encodeResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	err = rt.db.RevokeBan(*targetUser, user.Id)

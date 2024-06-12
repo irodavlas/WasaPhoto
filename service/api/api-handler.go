@@ -22,8 +22,8 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.PUT("/follow/:userId", rt.followUser)
 	rt.router.DELETE("/follow/:userId", rt.unfollowUser)
 
-	rt.router.PUT("/ban/:userId", rt.banUser)
-	rt.router.DELETE("/ban/:userId", rt.unBanUser)
+	rt.router.PUT("/ban/:username", rt.banUser)
+	rt.router.DELETE("/ban/:username", rt.unBanUser)
 
 	// get
 	rt.router.GET("/users/:userId/profile", rt.getProfile)

@@ -239,9 +239,14 @@ paths:
             $ref: '#/components/responses/UnauthorizedResponse'
           "500":
             $ref: '#/components/responses/InternalServerError'
-    /ban/{userId}:
+    /ban/{username}:
       parameters:
-        - $ref: "#/components/parameters/userId"
+        - name: username
+          in: path
+          description: User username
+          required: true
+          schema:
+            $ref: "#/components/schemas/username"
       put: #banUser
         operationId: banUser
         tags: ["Banned"]

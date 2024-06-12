@@ -33,7 +33,6 @@ package database
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"myproject/service/types"
 )
 
@@ -70,17 +69,71 @@ func New(db *sql.DB) (AppDatabase, error) {
 		return nil, errors.New("database is required when building a AppDatabase")
 	}
 
-	// Check if table exists. If not, the database is empty, and we need to create the structure
-	var tableName string
-	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='example_table';`).Scan(&tableName)
-	if errors.Is(err, sql.ErrNoRows) {
-		sqlStmt := `CREATE TABLE example_table (id INTEGER NOT NULL PRIMARY KEY, name TEXT);`
-		_, err = db.Exec(sqlStmt)
-		if err != nil {
-			return nil, fmt.Errorf("error creating database structure: %w", err)
-		}
+	// Users table
+	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+    	username TEXT NOT NULL
+    );`)
+	if err != nil {
+		return nil, err
+	}
+	// follower table
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS followers (
+        user_id TEXT,
+		follower_id TEXT,
+		PRIMARY KEY (user_id, follower_id),
+		FOREIGN KEY (user_id) REFERENCES users(id),
+		FOREIGN KEY (follower_id) REFERENCES users(id)
+    );`)
+	if err != nil {
+		return nil, err
+	}
+	// posts table
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS posts (
+        post_id TEXT primary key,
+		owner_id TEXT,
+		photo TEXT,
+		created_at TIMESTAMP, owner_username TEXT,
+		FOREIGN KEY (owner_id) REFERENCES users(id)
+    );`)
+	if err != nil {
+		return nil, err
+	}
+	// comments table
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS comments (
+        comment_id TEXT PRIMARY KEY,
+		user_id TEXT,
+		post_id TEXT,
+		comment_content TEXT NOT NULL,
+		FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
+		Foreign key (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );`)
+	if err != nil {
+		return nil, err
 	}
 
+	// bans table
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS bans (
+        banned_id TEXT,
+		user_id TEXT,
+		PRIMARY KEY (banned_id, user_id),
+		FOREIGN KEY (banned_id) REFERENCES users(id),
+		FOREIGN KEY (user_id) REFERENCES users(id)
+    );`)
+	if err != nil {
+		return nil, err
+	}
+	// likes table
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS likes (
+        like_id TEXT PRIMARY KEY,
+		user_id TEXT,
+		post_id TEXT,
+		FOREIGN KEY (user_id) REFERENCES users(id)  ON DELETE CASCADE,
+		FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE
+    );`)
+	if err != nil {
+		return nil, err
+	}
 	return &appdbimpl{
 		c: db,
 	}, nil

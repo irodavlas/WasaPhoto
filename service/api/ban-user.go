@@ -15,7 +15,7 @@ func (rt *_router) banUser(w http.ResponseWriter, r *http.Request, ps httprouter
 		return
 	}
 
-	targetUsername := ps.ByName("userId")
+	targetUsername := ps.ByName("username")
 	rt.baseLogger.Println(targetUsername)
 	targetUser, err := rt.isUserRegistered("", targetUsername)
 	if err != nil {

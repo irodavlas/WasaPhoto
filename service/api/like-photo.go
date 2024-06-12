@@ -19,7 +19,7 @@ func (rt *_router) likePhoto(w http.ResponseWriter, r *http.Request, ps httprout
 
 	err = rt.db.InsertLike(generateGenericToken(), postId, *user)
 	if err != nil {
-		encodeResponse(w, Msg400, http.StatusBadRequest)
+		encodeResponse(w, Msg400, http.StatusInternalServerError)
 		return
 	}
 	encodeResponse(w, Msg200, http.StatusOK)
