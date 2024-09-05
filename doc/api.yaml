@@ -1,0 +1,711 @@
+openapi: 3.0.3
+info:
+  title: WasaPhoto API Specifications
+  description: |-
+    This OpenAPI document describes the WasaPhoto Project.
+  version: "0.1"
+tags:
+  - name: Login
+    description: Access information
+  - name: Settings
+    description: Here you can change the username
+  - name: View
+    description: Everything about the view
+  - name: Network 
+    description: Everything about follows management
+  - name: Photos
+    description: Everything about photo upload and deletion
+  - name: Bans
+    description: Everything about bans management
+  - name: Likes
+    description: Everything about likes management
+  - name: Comments
+    description: Everything about comments management
+
+paths:
+  /session:
+    post:
+      tags: ["Login"]
+      summary: Logs in the user 
+      description: |-
+          If the user does not exist, it will be created,
+          and an identifier is returned.
+          If the user exists, the user identifier is returned.
+      operationId: doLogin
+      requestBody:
+        description: User details
+        content:
+         application/json:
+          schema:
+            $ref: "#/components/schemas/username"
+        required: true
+      responses:
+          "201": 
+            description: user succesfully logged in
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/userId'
+          "400":
+            description: User log-in action failed
+
+          "500":
+              description: User log-in action failed
+                          
+  /users/{userId}:  
+    put: 
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        description: profile owner's userId
+        schema:
+          $ref: "#/components/schemas/userId"
+      tags: ["Settings"]
+      summary: Change username
+      description: |-
+        This method allows a user to change his/her username, the method returns the username and since the latter must be unique an error message if it is already used.
+      operationId: setMyUserName
+      requestBody:
+        description: new username
+        content:
+          application/json:
+                schema: 
+                  $ref: "#/components/schemas/username"
+            
+        required: true
+      responses:
+        "204": 
+          description: Username succesfully updated
+
+        "409": 
+          description: Conflict, the username already exists
+
+        "403": 
+          description: Unauthorized
+
+        "500":
+          description: Internal error
+
+
+  /profiles/{username}:  
+    get: 
+      parameters:
+      - name: username
+        in: path
+        required: true
+        description: Username of the profile's owner the user wants to see
+        schema:
+          $ref: "#/components/schemas/username"
+      - name: userId
+        in: query
+        required: true
+        description: profile owner's userId
+        schema:
+          $ref: "#/components/schemas/userId"
+      
+      tags: ["View"]
+      summary: View a profile
+      description: |-
+        This method allows a user to see in details the profile of another user. The method takes as input the username of the wanted profile and its link if found, an error otherwise.
+      operationId: getUserProfile
+      responses:
+        "200": 
+          description: "Profile succesfully retrieved"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/profile"
+        "404":
+          description: User not found
+
+        "403": 
+          description: Unauthorized
+
+        "500": 
+          description: An internal error occurred
+
+
+  /users/{userId}/followed/:
+    post:
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        description: profile owner's userId
+        schema:
+          $ref: "#/components/schemas/userId"
+      - name: username
+        in: query
+        required: true
+        description: username of the user to follow
+        schema:
+          $ref: "#/components/schemas/username"
+    
+      tags: ["Network"]
+      summary: Follow another user
+      description: |-
+          In this social network users are allowed to follow other users, which means that if user a follows user b user b's posts will appear in the stream of the user a.
+          The method adds user b to the array of user a's followed users. If something goes wrong an error is raised. 
+      operationId: followUser
+
+      responses:
+          '201':
+            description: User added to followed
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/username'
+
+          "403": 
+            description: Unauthorized
+
+          '404':
+            description: User's account not found or deleted
+
+          '500':
+            description: An internal error occurred
+
+  /users/{userId}/followed/{username}:
+
+    delete:
+      tags: ["Network"]
+      summary: Unfollow a user
+      description: |
+        This method allows user a who already follows user b to unfollow him/her. User a needs to specify in the request user b'username. The method returns user b' username and an error message in case of error.
+      operationId: unfollowUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: a's userId
+          schema:
+            $ref: "#/components/schemas/userId"
+        - name: username
+          in: path
+          required: true
+          description: Username of user b
+          schema:
+            $ref: "#/components/schemas/username"
+
+      responses:
+        "204": 
+          description: User succesfully unfollowed
+
+        "403": 
+          description: Unauthorized
+
+        "404":
+          description: User not found
+
+        "500": 
+          description: An internal error occurred
+
+  /photos/:
+
+    post:
+      parameters:
+      - name: userId
+        description: profile's owner userId
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/userId'
+      tags: ["Photos"]
+      summary: Post a new photo 
+      description: |-
+          This method posts a new photo.
+          A new photo is added even if there already exists an identical one.
+          The method returns the photo Uri, if some problem during loading occurs an error is raised.
+      operationId: uploadPhoto
+      requestBody:
+        description: Photo details
+        content:
+         image/png:
+          schema:
+            $ref: "#/components/schemas/image"
+        required: true    
+
+      responses:
+        "201": 
+          description: Photo succesfully uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/photoId'
+        '400':
+          description: The uploaded photo does not meet requirements 
+        '403': 
+          description: Unauthorized
+
+        "404":
+          description: User not found
+
+        '500':
+          description: An internal error occurred
+
+
+  /photos/{photoId}:
+    delete:
+      tags: ["Photos"]
+      summary: Delete a photo
+      description: |
+        This method allows user a who already follows user b to unfollow him/her. User a needs to specify in the request user b'username. The method returns user b' username and an error message in case of error.
+      operationId: deletePhoto
+      parameters:
+        - name: photoId
+          in: path
+          required: true
+          description: id of the photo the user wants to delete
+          schema:
+            $ref: '#/components/schemas/photoId'
+
+        - name: userId
+          in: query
+          required: true
+          description: owner's userId
+          schema:
+            $ref: '#/components/schemas/userId'
+
+      responses:
+        "204": 
+          description: Photo succesfully deleted
+
+        "403": 
+          description: Unauthorized
+          
+        "404":
+          description: Photo or user not found
+ 
+        "500": 
+          description: An internal error occurred
+
+
+  /users/{userId}/banned/:
+    post:
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        description: profile owner's userId
+        schema:
+          $ref: "#/components/schemas/userId"
+      - name: username
+        in: query
+        required: true
+        description: username to ban
+        schema:
+          $ref: "#/components/schemas/username"
+
+      tags: ["Bans"]
+      summary: Ban a user 
+      description: |-
+          A user can ban another user, if user a bans user b, user b will be added to user a's banned list.
+          The method returns the username of the banned user.
+      operationId: banUser
+
+      responses:
+        "201": 
+          description: user succesfully banned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/username'
+
+        "403": 
+          description: Unauthorized
+
+        "404":
+            description: user's account not found or deleted
+
+        "500":
+            description: An internal error occurred
+
+  /users/{userId}/banned/{username}:
+    delete:
+      tags: ["Bans"]
+      summary: Unban a user
+      description: |
+        This method allows user a who already banned user b to unban him/her. User a needs to specify in the request user b'username. The method returns user b' username and an error message in case of error.
+      operationId: unbanUser
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: profile owner's userId
+          schema:
+           $ref: "#/components/schemas/userId"
+        - name: username
+          in: path
+          required: true
+          description: b's username
+          schema:
+            $ref: "#/components/schemas/username"
+
+      responses:
+        "204": 
+          description: User succesfully unbanned
+
+        "403": 
+          description: Unauthorized
+
+        "404":
+          description: User not found
+
+        "500": 
+          description: An internal error occurred
+
+
+  /likes/:
+    post:
+      parameters:
+      - name: photoId
+        in: query
+        required: true
+        description: post identifier
+        schema:
+           $ref: "#/components/schemas/photoId"
+           
+      - name: userId
+        in: query
+        required: true
+        description: profile owner's userId
+        schema:
+          $ref: "#/components/schemas/userId"
+
+      tags: ["Likes"]
+      summary: Like a post 
+      description: |-
+          A user can put a like on another user's post, if user a wants to put a like on a user b's post, a's user id is added to the array of likes of b's post.
+          The method returns the identifier of the liked photo or raise an error in case of problems.
+      operationId: likePhoto   
+
+      responses:
+        "201": 
+          description: Like succesfully put
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/likeId'
+
+        "403":
+            description: Unauthorized
+
+        "404":
+            description: post not found or deleted
+
+        "500":
+            description: An internal error occurred
+ 
+
+  /likes/{likeId}:
+    delete:
+      tags: ["Likes"]
+      summary: Remove a like
+      description: |
+        This method allows user a who has already liked a user b's post to remove it, more specifically it removes a's uid from the array of likes of a's post.
+        The method returns the identifier of the liked photo or raise an error in case of problems.
+      operationId: unlikePhoto
+      parameters:
+        - name: likeId
+          in: path
+          required: true
+          description: like identifier
+          schema:
+            $ref: "#/components/schemas/likeId"
+
+        - name: userId
+          in: query
+          required: true
+          description: profile owner's userId
+          schema:
+            $ref: "#/components/schemas/userId"
+
+      responses:
+        "204": 
+          description: post succesfully unliked
+
+        "403":
+            description: Unauthorized
+
+        "404":
+            description: post not found or deleted
+
+        "500":
+            description: An internal error occurred
+
+
+  /comments/:
+    post:
+      parameters:
+      - name: photoId
+        in: query
+        required: true
+        description: photo identifier
+        schema:
+          $ref: "#/components/schemas/photoId"
+      
+      - name: userId
+        in: query
+        required: true
+        description: profile owner's userId
+        schema:
+          $ref: "#/components/schemas/userId"
+
+      tags: ["Comments"]
+      summary: put a comment to a post 
+      description: |-
+          A user can put a comment below another user's post, if user a wants to put a comment under a user b's post, a's user id is added to the array of comments of b's post.The method returns the identifier of the posted comment or raise an error in case of problems. 
+      operationId: commentPhoto  
+      requestBody:
+        description: content of the comment
+        content:
+         application/json:
+          schema:
+            description: |
+              text of the comment
+            type: string
+            pattern: '^.*?$'
+            minLength: 1
+            maxLength: 200
+            example: this is the content of the comment
+        required: true
+
+      responses:
+        "201": 
+          description: Comment successfully posted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/commentId'
+              
+        "403":
+            description: Unauthorized
+
+        "404":
+            description: photo not found or deleted
+
+        "500":
+            description: An internal error occurred
+ 
+  /comments/{commentId}:
+
+    delete:
+      tags: ["Comments"]
+      summary: Remove a comment
+      description: |
+        This method allows user a who has already put a comment to user b's photo to remove it, more specifically it removes a's uid from the array of comments of a's post.
+        The method returns the identifier of the commented photo or raise an error in case of problems.
+      operationId: uncommentPhoto
+      parameters:
+      - name: commentId
+        in: path
+        required: true
+        description: comment identifier
+        schema:
+          $ref: "#/components/schemas/commentId"
+      - name: userId
+        in: query
+        required: true
+        description: profile owner's userId
+        schema:
+          $ref: "#/components/schemas/userId"
+
+      responses:
+        "204": 
+          description: comment succesfully deleted
+    
+        "403":
+            description: Unauthorized
+
+        "404":
+            description: post not found or deleted
+
+        "500":
+            description: An internal error occurred
+ 
+  /users/{userId}/stream:
+    get:
+      tags: ["View"]
+      summary: Get the stream
+      description: |
+        This method allows the user to gets the stream of all posted photos of his/her followed users diplayed in chronological order.
+        The method should return an array of photos, if something goes wrong it raises an error. 
+      operationId: getMyStream
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        description: profile owner's userId
+        schema:
+          $ref: "#/components/schemas/userId"
+
+      responses:
+        "200": 
+          description: stream succesfully returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/stream"
+        "403":
+            description: Unauthorized
+
+        "404":
+            description: user's account not found or deleted
+
+        "500":
+            description: An internal error occurred
+
+          
+components:
+  securitySchemes:
+        bearerAuth:
+          type: http
+          scheme: bearer
+          bearerFormat: JWT 
+  schemas:
+
+      username: 
+        description: |
+          Every user has a unique username he/she can use to log in, it is the name which users can use to find other users.
+        type: string
+        example: "User432"
+        pattern: '^.*?$'
+        minLength: 3
+        maxLength: 16
+
+      userId: 
+        description: |
+          It is the identifier the system uses to handle users
+        type: string
+        pattern: '^.*?$'
+        minLength: 16
+        maxLength: 16
+        example: wu3v54u89ncf4n8o
+
+      stream:
+        type: array
+        items: 
+          $ref: "#/components/schemas/photo"
+        minItems: 0
+        maxItems: 15
+        description: array of stream photos
+          
+      photoId:
+        type: string
+        description: photo unique identifier
+        pattern: '^.*?$'
+        minLength: 16
+        maxLength: 16
+        example: qcn3nu8f49q33cfg
+
+      image:
+        type: string
+        format: binary
+        description: image encoding
+        pattern: '^.*?$'
+        minLength: 1
+        maxLength: 999
+
+      likeId:
+        type: string
+        description: like identifier
+        pattern: '^.*?$'
+        minLength: 16
+        maxLength: 16
+        example: qcn3nu8f49q33cfg
+
+      commentId:
+            type: string
+            description: comment's unique identifier
+            pattern: '^.*?$'
+            minLength: 16
+            maxLength: 16
+            example: qcn3nu8f49q33cfg
+
+      content:
+            description: text of the comment
+            type: string
+            pattern: '^.*?$'
+            minLength: 1
+            maxLength: 999
+            example: qcn3nu8f49q33cfg
+      
+      banned: 
+          description: banned status of the profile
+          type: boolean
+
+      comment:
+          type: object
+          description: comment object
+          properties:
+            content:
+              $ref: "#/components/schemas/content"
+            commentId:
+              $ref: "#/components/schemas/commentId"
+            username:
+              $ref: "#/components/schemas/username"
+
+      comments:
+            type: array
+            items: 
+              $ref: "#/components/schemas/comment"
+            minItems: 0
+            maxItems: 16
+            description: array of comments
+
+      likes:
+            description: number of likes the photo received
+            type: integer
+            example: 13
+
+      followers:
+            description: number of followers a user has
+            type: integer
+            example: 39
+
+      following:
+            description: number of following people
+            type: integer
+            example: 70
+
+      photo:
+        type: object
+        description: photo object
+        properties:
+          image:
+            $ref: "#/components/schemas/image"
+          photoId:
+            $ref: "#/components/schemas/photoId"
+          username:
+            $ref: "#/components/schemas/username"
+          comments:
+            $ref: "#/components/schemas/comments"
+          likes:
+            $ref: "#/components/schemas/likes"
+          likeId:
+            $ref: "#/components/schemas/likeId"
+      
+      profile:
+        type: object
+        description: profile object
+        properties:
+          photos:
+            $ref: "#/components/schemas/stream"
+          followers:
+            $ref: "#/components/schemas/followers"
+          following: 
+            $ref: "#/components/schemas/following"
+          banned:
+            $ref: "#/components/schemas/banned"
+
+
+security:
+  - bearerAuth: [] 
+      
+    
+
+
+                      
+                      
+                    
